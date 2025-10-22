@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coming Soon - iloveschoolwork.com</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      background: #000;
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+    }
+
+    .glow-text {
+      display: flex;
+      font-size: 4em;
+      font-weight: bold;
+      justify-content: center;
+    }
+
+    .glow-text span {
+      color: #fff;
+      text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #fff, 0 0 40px #fff;
+      display: inline-block;
+      margin: 0 2px;
+      animation: flicker 2s infinite;
+    }
+
+    /* Flicker animation with different timings for each letter */
+    .glow-text span:nth-child(1) { animation-delay: 0s; }
+    .glow-text span:nth-child(2) { animation-delay: 0.1s; }
+    .glow-text span:nth-child(3) { animation-delay: 0.2s; }
+    .glow-text span:nth-child(4) { animation-delay: 0.3s; }
+    .glow-text span:nth-child(5) { animation-delay: 0.4s; }
+    .glow-text span:nth-child(6) { animation-delay: 0.5s; }
+    .glow-text span:nth-child(7) { animation-delay: 0.6s; }
+    .glow-text span:nth-child(8) { animation-delay: 0.7s; }
+    .glow-text span:nth-child(9) { animation-delay: 0.8s; }
+    .glow-text span:nth-child(10){ animation-delay: 0.9s; }
+
+    @keyframes flicker {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #fff, 0 0 40px #fff;
+      }
+      20%, 22%, 24%, 55% {
+        text-shadow: 0 0 2px #fff, 0 0 4px #fff, 0 0 8px #fff, 0 0 16px #fff;
+      }
+    }
+
+    p {
+      font-size: 1.5em;
+      text-align: center;
+      color: #ccc;
+      margin-top: 20px;
+      max-width: 600px;
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-text">
+    <span>C</span><span>o</span><span>m</span><span>i</span><span>n</span><span>g</span>
+    <span> </span>
+    <span>S</span><span>o</span><span>o</span><span>n</span>
+  </div>
+  <p>the best website for bookmarklets school cheats, game cheats, and more</p>
+</body>
+</html>
