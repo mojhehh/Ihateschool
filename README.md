@@ -1,1 +1,1 @@
-I dont even want to have this open source but ig here we are.
+I dont even want to have this open source but here we are.
