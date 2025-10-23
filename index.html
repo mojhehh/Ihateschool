@@ -17,6 +17,14 @@
       overflow: hidden;
     }
 
+    .brand-text {
+      display: flex;
+      font-size: 6em; 
+      font-weight: bold;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
     .glow-text {
       display: flex;
       font-size: 4em;
@@ -24,6 +32,7 @@
       justify-content: center;
     }
 
+    .brand-text span,
     .glow-text span {
       color: #fff;
       text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #fff, 0 0 40px #fff;
@@ -32,7 +41,14 @@
       animation: flicker 2s infinite;
     }
 
-    /* Flicker animation with different timings for each letter */
+    /* Flicker animation delays for letters */
+    .brand-text span:nth-child(1) { animation-delay: 0s; }
+    .brand-text span:nth-child(2) { animation-delay: 0.1s; }
+    .brand-text span:nth-child(3) { animation-delay: 0.2s; }
+    .brand-text span:nth-child(4) { animation-delay: 0.3s; }
+    .brand-text span:nth-child(5) { animation-delay: 0.4s; }
+    .brand-text span:nth-child(6) { animation-delay: 0.5s; }
+
     .glow-text span:nth-child(1) { animation-delay: 0s; }
     .glow-text span:nth-child(2) { animation-delay: 0.1s; }
     .glow-text span:nth-child(3) { animation-delay: 0.2s; }
@@ -43,6 +59,7 @@
     .glow-text span:nth-child(8) { animation-delay: 0.7s; }
     .glow-text span:nth-child(9) { animation-delay: 0.8s; }
     .glow-text span:nth-child(10){ animation-delay: 0.9s; }
+    .glow-text span:nth-child(11){ animation-delay: 1s; }
 
     @keyframes flicker {
       0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
@@ -63,6 +80,9 @@
   </style>
 </head>
 <body>
+  <div class="brand-text">
+    <span>V</span><span>e</span><span>l</span><span>t</span><span>r</span><span>a</span>
+  </div>
   <div class="glow-text">
     <span>C</span><span>o</span><span>m</span><span>i</span><span>n</span><span>g</span>
     <span> </span>
@@ -71,6 +91,3 @@
   <p>the best place for bookmarklets for school games and more</p>
 </body>
 </html>
-
-
-
