@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Coming Soon - iloveschoolwork.com</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="https://i.postimg.cc/1tmRfb3C/black-and-white-geometric-logos-1-1.png">
+
   <style>
     body {
       margin: 0;
@@ -17,17 +21,33 @@
       overflow: hidden;
     }
 
+    /* Logo */
+    img.logo {
+      width: 35%;       /* slightly smaller than before */
+      max-width: 300px; /* caps max width */
+      height: auto;
+      margin-bottom: 30px;
+      animation: logoGlow 2s infinite alternate;
+    }
+
+    @keyframes logoGlow {
+      from { filter: drop-shadow(0 0 8px #fff); }
+      to { filter: drop-shadow(0 0 20px #fff); }
+    }
+
+    /* Brand Text */
     .brand-text {
       display: flex;
-      font-size: 6em; 
+      font-size: 7em;   /* bigger */
       font-weight: bold;
       justify-content: center;
       margin-bottom: 20px;
     }
 
+    /* Coming Soon Text */
     .glow-text {
       display: flex;
-      font-size: 4em;
+      font-size: 5em;   /* bigger */
       font-weight: bold;
       justify-content: center;
     }
@@ -71,25 +91,23 @@
     .glow-text span:nth-child(11){ animation-delay: 1s; }
 
     @keyframes flicker {
-      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-        opacity: 1;
-      }
-      20%, 22%, 24%, 55% {
-        opacity: 0.8;
-      }
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+      20%, 22%, 24%, 55% { opacity: 0.8; }
     }
 
+    /* Description */
     p {
-      font-size: 1.5em;
+      font-size: 1.8em;   /* slightly bigger */
       text-align: center;
       color: #ccc;
       margin-top: 20px;
       max-width: 600px;
-      text-shadow: 0 0 2px #aaa, 0 0 3px #999; /* barely glowing */
+      text-shadow: 0 0 2px #aaa, 0 0 3px #999;
     }
   </style>
 </head>
 <body>
+  <img src="https://i.postimg.cc/bwP1mNCS/black-and-white-geometric-logos-1-1.png" alt="Veltra Logo" class="logo">
   <div class="brand-text">
     <span>V</span><span>e</span><span>l</span><span>t</span><span>r</span><span>a</span>
   </div>
