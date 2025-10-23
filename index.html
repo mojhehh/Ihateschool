@@ -19,7 +19,7 @@
 
     .brand-text {
       display: flex;
-      font-size: 7em; /* slightly bigger */
+      font-size: 6em; 
       font-weight: bold;
       justify-content: center;
       margin-bottom: 20px;
@@ -32,23 +32,25 @@
       justify-content: center;
     }
 
+    /* Veltra glow */
     .brand-text span {
       color: #fff;
-      text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 50px #fff; /* stronger glow */
+      text-shadow: 0 0 4px #fff, 0 0 8px #fff, 0 0 16px #fff, 0 0 32px #fff;
       display: inline-block;
       margin: 0 2px;
       animation: flicker 2s infinite;
     }
 
+    /* Coming Soon glow (weaker) */
     .glow-text span {
       color: #fff;
-      text-shadow: 0 0 3px #fff, 0 0 6px #fff, 0 0 12px #fff, 0 0 20px #fff; /* dimmer glow */
+      text-shadow: 0 0 2px #fff, 0 0 4px #fff, 0 0 8px #fff, 0 0 16px #fff;
       display: inline-block;
       margin: 0 2px;
       animation: flicker 2s infinite;
     }
 
-    /* Flicker delays */
+    /* Flicker animation delays */
     .brand-text span:nth-child(1) { animation-delay: 0s; }
     .brand-text span:nth-child(2) { animation-delay: 0.1s; }
     .brand-text span:nth-child(3) { animation-delay: 0.2s; }
@@ -70,10 +72,10 @@
 
     @keyframes flicker {
       0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-        text-shadow: inherit;
+        opacity: 1;
       }
       20%, 22%, 24%, 55% {
-        text-shadow: none;
+        opacity: 0.8;
       }
     }
 
@@ -83,6 +85,7 @@
       color: #ccc;
       margin-top: 20px;
       max-width: 600px;
+      text-shadow: 0 0 2px #aaa, 0 0 3px #999; /* barely glowing */
     }
   </style>
 </head>
