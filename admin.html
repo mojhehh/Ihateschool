@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Veltra — Admin</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Login panel (hidden completely until lock clicked from index or direct open) -->
+    <div id="loginPanel" class="panel">
+      <h2>Admin Login</h2>
+      <div class="form-row">
+        <input id="email" class="input" placeholder="Admin email" type="email">
+        <input id="password" class="input" placeholder="Password" type="password">
+        <button id="loginBtn" class="btn">Login</button>
+      </div>
+      <div id="loginMsg" class="note"></div>
+      <div class="note">Click the lock on the main page to open this. Nothing admin loads until you log in.</div>
+    </div>
+
+    <!-- admin UI -->
+    <div id="adminUI" style="display:none;">
+      <div class="panel">
+        <h2>Admin Panel</h2>
+        <div class="small">Add / edit / delete bookmarks and categories. Changes update in realtime.</div>
+        <hr>
+
+        <h3>Add or Edit Bookmark</h3>
+        <div class="form-row">
+          <input id="bTitle" class="input" placeholder="Title">
+          <span class="small">The name shown to users.</span>
+        </div>
+
+        <div class="form-row">
+          <input id="bUrl" class="input" placeholder="Direct URL (optional)">
+          <span class="small">Optional. If provided, 'Open' will open this URL.</span>
+        </div>
+
+        <div class="form-row">
+          <input id="bCode" class="input" placeholder="One-line code/bookmarklet (one-liner)">
+          <span class="small">Paste a single-line bookmarklet or code. Must be one line.</span>
+        </div>
+
+        <div class="form-row">
+          <input id="bCats" class="input" placeholder="Categories (comma separated keys)">
+          <span class="small">Category keys (created below). Example: tools,fun</span>
+        </div>
+
+        <div class="form-row">
+          <input id="bCredits" class="input" placeholder="Credits link (optional)">
+          <span class="small">Optional: credit source or author link.</span>
+          <label style="color:var(--text);"><input id="bFeatured" type="checkbox"> Featured</label>
+        </div>
+
+        <div class="form-row">
+          <button id="saveBookmark" class="btn">Save</button>
+          <button id="clearForm" class="btn">Clear</button>
+        </div>
+
+        <hr>
+        <h3>Categories</h3>
+        <div class="form-row">
+          <input id="catKey" class="input" placeholder="Category key (no spaces)">
+          <input id="catName" class="input" placeholder="Category display name">
+          <button id="addCat" class="btn">Add Category</button>
+        </div>
+        <div class="note">Category keys are the internal identifiers you use when adding bookmarks.</div>
+
+        <hr>
+        <h3>Existing Bookmarks</h3>
+        <div id="adminList"></div>
+
+        <hr>
+        <div class="form-row">
+          <button id="logoutBtn" class="btn">Logout</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from './firebase-config.js';
+    import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+    import { ref, onValue, push, set, update, remove, get, runTransaction } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
+
+    // elements
+    const loginPanel = document.getElementById('loginPanel');
+    const loginMsg = document.getElementById('loginMsg');
+    const adminUI = document.getElementById('adminUI');
+    const loginBtn = document.getElementById('loginBtn');
+    const emailEl = document.getElementById('email');
+    const passEl = document.getElementById('password');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    const bTitle = document.getElementById('bTitle');
+    const bUrl = document.getElementById('bUrl');
+    const bCode = document.getElementById('bCode');
+    const bCats = document.getElementById('bCats');
+    const bCredits = document.getElementById('bCredits');
+    const bFeatured = document.getElementById('bFeatured');
+    const saveBookmark = document.getElementById('saveBookmark');
+    const clearForm = document.getElementById('clearForm');
+    const adminList = document.getElementById('adminList');
+
+    const catKey = document.getElementById('catKey');
+    const catName = document.getElementById('catName');
+    const addCat = document.getElementById('addCat');
+
+    let editingId = null;
+    let bookmarksCache = {};
+    let categoriesCache = {};
+
+    // login handler
+    loginBtn.addEventListener('click', async () => {
+      loginMsg.textContent = '';
+      try {
+        const cred = await signInWithEmailAndPassword(auth, emailEl.value.trim(), passEl.value);
+        const uid = cred.user.uid;
+        // verify admin node exists
+        const snap = await get(ref(db, `admins/${uid}`));
+        if(!snap.exists()){
+          await signOut(auth);
+          loginMsg.textContent = 'Not an admin.';
+          return;
+        }
+        loginPanel.style.display = 'none';
+        adminUI.style.display = 'block';
+      } catch (err){
+        loginMsg.textContent = 'Login failed: ' + err.message;
+      }
+    });
+
+    // auth state check
+    onAuthStateChanged(auth, async (user) => {
+      if(user){
+        const uid = user.uid;
+        const snap = await get(ref(db, `admins/${uid}`));
+        if(snap.exists()){
+          loginPanel.style.display = 'none';
+          adminUI.style.display = 'block';
+        } else {
+          try { await signOut(auth); } catch(e){}
+          loginPanel.style.display = 'block';
+          adminUI.style.display = 'none';
+        }
+      } else {
+        loginPanel.style.display = 'block';
+        adminUI.style.display = 'none';
+      }
+    });
+
+    // logout
+    logoutBtn.addEventListener('click', async () => {
+      await signOut(auth);
+      loginPanel.style.display = 'block';
+      adminUI.style.display = 'none';
+    });
+
+    // live watches
+    const bRef = ref(db, 'bookmarks');
+    onValue(bRef, snap => {
+      bookmarksCache = snap.val() || {};
+      renderAdminList();
+    });
+
+    const cRef = ref(db, 'categories');
+    onValue(cRef, snap => {
+      categoriesCache = snap.val() || {};
+      renderAdminList();
+    });
+
+    function renderAdminList(){
+      adminList.innerHTML = '';
+      const entries = Object.entries(bookmarksCache).sort((a,b)=> (b[1].createdAt||0) - (a[1].createdAt||0));
+      if(entries.length === 0){
+        adminList.innerHTML = '<div class="small">No bookmarks yet.</div>';
+        return;
+      }
+      entries.forEach(([id,item])=>{
+        const div = document.createElement('div');
+        div.className = 'panel';
+        div.style.marginBottom = '8px';
+        const cats = (item.categories || item.category || []).toString();
+        div.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-weight:600;">${escapeHtml(item.title||'Untitled')}</div>
+              <div class="small">${escapeHtml(item.desc||'')}</div>
+              <div class="small">Cats: ${escapeHtml(cats)}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <button class="btn edit" data-id="${id}">Edit</button>
+              <button class="btn delete" data-id="${id}">Delete</button>
+            </div>
+          </div>
+        `;
+        adminList.appendChild(div);
+      });
+
+      // attach handlers
+      adminList.querySelectorAll('.edit').forEach(btn => {
+        btn.addEventListener('click', ()=> {
+          const id = btn.dataset.id;
+          startEdit(id);
+        });
+      });
+      adminList.querySelectorAll('.delete').forEach(btn => {
+        btn.addEventListener('click', async ()=> {
+          const id = btn.dataset.id;
+          const ok = confirm('Delete this bookmark? This cannot be undone.');
+          if(!ok) return;
+          await remove(ref(db, `bookmarks/${id}`));
+          alert('Deleted.');
+        });
+      });
+    }
+
+    function startEdit(id){
+      const b = bookmarksCache[id];
+      if(!b) return;
+      editingId = id;
+      bTitle.value = b.title || '';
+      bUrl.value = b.url || '';
+      bCode.value = b.code || '';
+      bCats.value = (b.categories || b.category || []).join ? (b.categories || []).join(',') : (b.categories || b.category || '');
+      bCredits.value = b.creditsLink || '';
+      bFeatured.checked = !!b.featured;
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    // save bookmark add/update
+    saveBookmark.addEventListener('click', async () => {
+      const title = bTitle.value.trim();
+      const url = bUrl.value.trim();
+      const code = bCode.value.trim();
+      const catsRaw = bCats.value.trim();
+      const categoriesArr = catsRaw ? catsRaw.split(',').map(s=>s.trim()).filter(Boolean) : [];
+      const credits = bCredits.value.trim();
+      const featured = bFeatured.checked;
+
+      if(!title || (!url && !code)){
+        alert('Please provide a title and either a url or a one-line code/bookmarklet.');
+        return;
+      }
+
+      // one-line code requirement
+      if(code && code.split(/\r\n|\r|\n/).length > 1){
+        alert('Bookmarklet/code must be a single line (one-liner). Remove line breaks.');
+        return;
+      }
+
+      const payload = {
+        title,
+        desc: '',
+        url: url || '',
+        code: code || '',
+        categories: categoriesArr,
+        creditsLink: credits || '',
+        featured: !!featured,
+        popularity: editingId ? (bookmarksCache[editingId]?.popularity || 0) : 0,
+        createdAt: editingId ? (bookmarksCache[editingId]?.createdAt || Date.now()) : Date.now()
+      };
+
+      if(editingId){
+        await update(ref(db, `bookmarks/${editingId}`), payload);
+        alert('Updated.');
+        editingId = null;
+      } else {
+        const newRef = push(ref(db, 'bookmarks'));
+        await set(newRef, payload);
+        alert('Added.');
+      }
+
+      // clear
+      bTitle.value = bUrl.value = bCode.value = bCats.value = bCredits.value = '';
+      bFeatured.checked = false;
+    });
+
+    clearForm.addEventListener('click', ()=> {
+      editingId = null;
+      bTitle.value = bUrl.value = bCode.value = bCats.value = bCredits.value = '';
+      bFeatured.checked = false;
+    });
+
+    addCat.addEventListener('click', async () => {
+      const key = (catKey.value || '').trim();
+      const name = (catName.value || '').trim();
+      if(!key || !name){
+        alert('Please provide both a category key and a display name.');
+        return;
+      }
+      await set(ref(db, `categories/${key}`), { name, createdAt: Date.now() });
+      catKey.value = ''; catName.value = '';
+      alert('Category added.');
+    });
+
+    // helper
+    function escapeHtml(s){ if(!s) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+  </script>
+</body>
+</html>
