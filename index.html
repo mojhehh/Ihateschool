@@ -1,126 +1,231 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Coming Soon - Veltra</title>
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="https://i.postimg.cc/1tmRfb3C/black-and-white-geometric-logos-1-1.png">
-
-  <style>
-    body {
-      margin: 0;
-      min-height: 100vh; /* Use min-height to allow content to extend */
-      display: flex;
-      justify-content: flex-start; /* Align content to the top */
-      align-items: center; /* Keep content centered horizontally */
-      flex-direction: column;
-      background: #000;
-      font-family: 'Arial', sans-serif;
-      overflow: hidden;
-      padding-top: 5vh; /* Add some padding to the top for spacing */
-      box-sizing: border-box; /* Include padding in the element's total height */
-    }
-
-    /* Logo */
-    img.logo {
-      width: 25%;       /* Make logo smaller */
-      max-width: 200px; /* Caps max width */
-      height: auto;
-      margin-bottom: 20px; /* Reduce margin-bottom */
-      animation: logoGlow 2s infinite alternate;
-    }
-
-    @keyframes logoGlow {
-      from { filter: drop-shadow(0 0 6px #fff); }
-      to { filter: drop-shadow(0 0 16px #fff); }
-    }
-
-    /* Brand Text */
-    .brand-text {
-      display: flex;
-      font-size: 5em;   /* Make text smaller */
-      font-weight: bold;
-      justify-content: center;
-      margin-bottom: 15px; /* Reduce margin-bottom */
-    }
-
-    /* Coming Soon Text */
-    .glow-text {
-      display: flex;
-      font-size: 3em;   /* Make text smaller */
-      font-weight: bold;
-      justify-content: center;
-    }
-
-    /* Veltra glow */
-    .brand-text span {
-      color: #fff;
-      text-shadow: 0 0 4px #fff, 0 0 8px #fff, 0 0 16px #fff, 0 0 32px #fff;
-      display: inline-block;
-      margin: 0 1px;
-      animation: flicker 2s infinite;
-    }
-
-    /* Coming Soon glow (weaker) */
-    .glow-text span {
-      color: #fff;
-      text-shadow: 0 0 2px #fff, 0 0 4px #fff, 0 0 8px #fff, 0 0 16px #fff;
-      display: inline-block;
-      margin: 0 1px;
-      animation: flicker 2s infinite;
-    }
-
-    /* Flicker animation delays */
-    .brand-text span:nth-child(1) { animation-delay: 0s; }
-    .brand-text span:nth-child(2) { animation-delay: 0.1s; }
-    .brand-text span:nth-child(3) { animation-delay: 0.2s; }
-    .brand-text span:nth-child(4) { animation-delay: 0.3s; }
-    .brand-text span:nth-child(5) { animation-delay: 0.4s; }
-    .brand-text span:nth-child(6) { animation-delay: 0.5s; }
-
-    .glow-text span:nth-child(1) { animation-delay: 0s; }
-    .glow-text span:nth-child(2) { animation-delay: 0.1s; }
-    .glow-text span:nth-child(3) { animation-delay: 0.2s; }
-    .glow-text span:nth-child(4) { animation-delay: 0.3s; }
-    .glow-text span:nth-child(5) { animation-delay: 0.4s; }
-    .glow-text span:nth-child(6) { animation-delay: 0.5s; }
-    .glow-text span:nth-child(7) { animation-delay: 0.6s; }
-    .glow-text span:nth-child(8) { animation-delay: 0.7s; }
-    .glow-text span:nth-child(9) { animation-delay: 0.8s; }
-    .glow-text span:nth-child(10){ animation-delay: 0.9s; }
-    .glow-text span:nth-child(11){ animation-delay: 1s; }
-
-    @keyframes flicker {
-      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
-      20%, 22%, 24%, 55% { opacity: 0.8; }
-    }
-
-    /* Description */
-    p {
-      font-size: 1.2em;   /* Make text smaller */
-      text-align: center;
-      color: #ccc;
-      margin-top: 15px; /* Reduce margin-top */
-      max-width: 500px;
-      text-shadow: 0 0 7px #aaa, 0 0 7px #999;
-    }
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Veltra</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <img src="https://i.postimg.cc/bwP1mNCS/black-and-white-geometric-logos-1-1.png" alt="Veltra Logo" class="logo">
-  <div class="brand-text">
-    <span>V</span><span>e</span><span>l</span><span>t</span><span>r</span><span>a</span>
+  <div class="container">
+    <div class="header">
+      <div class="logo">V</div>
+      <div>
+        <div class="title">Veltra</div>
+        <div class="tag">Bookmarks & bookmarklets — clean & quick</div>
+      </div>
+
+      <div class="controls">
+        <input id="search" class="search" placeholder="Search... (press Enter to apply)">
+        <select id="sortSelect" class="select" title="Sort">
+          <option value="newest">Newest</option>
+          <option value="popular">Most popular</option>
+          <option value="alpha">Alphabetical</option>
+        </select>
+        <button id="instructionsBtn" class="btn">Instructions</button>
+      </div>
+    </div>
+
+    <div class="top-controls">
+      <div class="filter-row">
+        <div class="small">Filter categories:</div>
+        <div id="catChips" class="cat-chips"></div>
+      </div>
+      <div class="controls-row">
+        <div class="small">Selected: <span id="activeCount">All</span></div>
+        <button id="clearCats" class="btn">Clear</button>
+      </div>
+    </div>
+
+    <div id="grid" class="grid"></div>
+    <div id="placeholder" class="placeholder" style="display:none;">No bookmarks match. Try another filter.</div>
   </div>
-  <div class="glow-text">
-    <span>C</span><span>o</span><span>m</span><span>i</span><span>n</span><span>g</span>
-    <span> </span>
-    <span>S</span><span>o</span><span>o</span><span>n</span>
-  </div>
-  <p>the best place for bookmarklets for school, games, and more.</p>
+
+  <button id="lockBtn" class="lock-btn" title="Admin">🔒</button>
+
+  <div id="toast" class="toast"><span id="toastText"></span></div>
+
+  <script type="module">
+    import { db } from './firebase-config.js';
+    import { ref, onValue, runTransaction, get } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
+
+    // elements
+    const grid = document.getElementById('grid');
+    const toast = document.getElementById('toast');
+    const toastText = document.getElementById('toastText');
+    const searchInput = document.getElementById('search');
+    const sortSelect = document.getElementById('sortSelect');
+    const catChips = document.getElementById('catChips');
+    const clearCats = document.getElementById('clearCats');
+    const activeCount = document.getElementById('activeCount');
+    const instructionsBtn = document.getElementById('instructionsBtn');
+    const lockBtn = document.getElementById('lockBtn');
+
+    lockBtn.addEventListener('click', ()=> location.href = 'admin.html');
+    instructionsBtn.addEventListener('click', ()=> location.href = 'instructions.html');
+
+    // state
+    let bookmarks = {};
+    let categories = {};
+    let selectedCats = new Set();
+    let currentSort = sortSelect.value;
+    let lastSearchTerm = '';
+
+    // load categories (realtime)
+    const catsRef = ref(db, 'categories');
+    onValue(catsRef, snap => {
+      categories = snap.val() || {};
+      renderCategoryChips();
+    });
+
+    // load bookmarks (realtime)
+    const bmRef = ref(db, 'bookmarks');
+    onValue(bmRef, snap => {
+      bookmarks = snap.val() || {};
+      renderGrid();
+    });
+
+    function renderCategoryChips(){
+      catChips.innerHTML = '';
+      const keys = Object.keys(categories).sort();
+      if(keys.length === 0){
+        catChips.innerHTML = '<div class="small">No categories yet</div>';
+        return;
+      }
+      keys.forEach(k => {
+        const name = categories[k].name || k;
+        const btn = document.createElement('button');
+        btn.className = 'cat-chip';
+        btn.textContent = name;
+        btn.dataset.key = k;
+        btn.addEventListener('click', ()=> {
+          const key = btn.dataset.key;
+          if(selectedCats.has(key)) selectedCats.delete(key); else selectedCats.add(key);
+          updateSelectedUI();
+          renderGrid();
+        });
+        catChips.appendChild(btn);
+      });
+      updateSelectedUI();
+    }
+
+    function updateSelectedUI(){
+      const chips = Array.from(catChips.querySelectorAll('.cat-chip'));
+      chips.forEach(chip => {
+        const key = chip.dataset.key;
+        chip.classList.toggle('selected', selectedCats.has(key));
+      });
+      activeCount.textContent = selectedCats.size > 0 ? selectedCats.size + ' selected' : 'All';
+    }
+
+    clearCats.addEventListener('click', ()=>{
+      selectedCats.clear();
+      updateSelectedUI();
+      renderGrid();
+    });
+
+    // search behavior: apply on Enter
+    searchInput.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter'){
+        lastSearchTerm = searchInput.value.trim().toLowerCase();
+        renderGrid();
+      }
+    });
+
+    // sort
+    sortSelect.addEventListener('change', ()=> {
+      currentSort = sortSelect.value;
+      renderGrid();
+    });
+
+    // render grid
+    function renderGrid(){
+      grid.innerHTML = '';
+      const arr = Object.entries(bookmarks).map(([id,b]) => {
+        const item = Object.assign({}, b);
+        item._id = id;
+        // normalize categories
+        if(!item.categories){
+          if(item.category) item.categories = Array.isArray(item.category) ? item.category : [item.category];
+          else item.categories = [];
+        }
+        return item;
+      });
+
+      let filtered = arr.filter(b => {
+        // categories multiple selection
+        if(selectedCats.size > 0){
+          const bkCats = (b.categories || []).map(String);
+          const any = Array.from(selectedCats).some(s => bkCats.includes(s));
+          if(!any) return false;
+        }
+        // search
+        if(lastSearchTerm){
+          const text = ((b.title||'') + ' ' + (b.desc||'') + ' ' + (b.categories||[]).join(' ')).toLowerCase();
+          return text.includes(lastSearchTerm);
+        }
+        return true;
+      });
+
+      // sort
+      if(currentSort === 'popular'){
+        filtered.sort((a,b)=> (b.popularity||0) - (a.popularity||0));
+      } else if(currentSort === 'alpha'){
+        filtered.sort((a,b)=> (a.title||'').localeCompare(b.title||''));
+      } else {
+        filtered.sort((a,b)=> (b.createdAt||0) - (a.createdAt||0));
+      }
+
+      if(filtered.length === 0){
+        document.getElementById('placeholder').style.display = 'block';
+        return;
+      } else {
+        document.getElementById('placeholder').style.display = 'none';
+      }
+
+      filtered.forEach(b => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        const catNames = (b.categories || []).map(k => categories[k] ? categories[k].name : k).filter(Boolean);
+        card.innerHTML = `
+          <div class="card-head">
+            <div class="titleSmall">${escapeHtml(b.title||'Untitled')}</div>
+            <div class="catTag">${escapeHtml(catNames.join(', ') || 'General')}</div>
+          </div>
+          <div class="desc">${escapeHtml(b.desc||'')}</div>
+          <div class="actions">
+            <button class="copy-square" title="Copy">⧉</button>
+            <a class="small" target="_blank" href="${escapeHtml(b.url||'#')}">Open</a>
+            ${b.creditsLink ? `<a class="small" target="_blank" href="${escapeHtml(b.creditsLink)}">Credits</a>` : ''}
+          </div>
+        `;
+        const copyBtn = card.querySelector('.copy-square');
+        copyBtn.addEventListener('click', async ()=>{
+          try {
+            await navigator.clipboard.writeText(b.code || b.url || '');
+            showToast('✅ Copied! Visit the <span class="link">instructions page</span> to install the bookmark.');
+            // increment popularity safely
+            const pRef = ref(db, `bookmarks/${b._id}/popularity`);
+            runTransaction(pRef, (curr) => (curr||0) + 1);
+          } catch(err){
+            showToast('✖ Copy failed — select and copy manually.');
+          }
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    function showToast(html){
+      toastText.innerHTML = html;
+      toast.classList.remove('hide');
+      toast.classList.add('show');
+      setTimeout(()=> {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+      }, 2400);
+    }
+
+    function escapeHtml(s){ if(!s) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+  </script>
 </body>
 </html>
-
-
-
