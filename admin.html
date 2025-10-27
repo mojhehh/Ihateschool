@@ -6,96 +6,480 @@
   <title>Veltra — Admin</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    body { background:black; color:white; font-family:sans-serif; }
-    .panel { background:#000; color:white; padding:16px; margin:8px 0; border:1px solid #fff; border-radius:8px; }
-    .input { background:#111; color:white; border:1px solid #fff; padding:8px; margin:4px 0; width:100%; }
-    .btn { background:#000; color:white; border:1px solid #fff; padding:8px 12px; cursor:pointer; }
-    .small { font-size:0.8em; color:#ccc; }
-    .note { font-size:0.8em; color:#aaa; margin-top:4px; }
+    /* small overrides to keep admin tidy even if style.css missing */
+    .center { text-align:center; }
+    .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .col { display:flex; flex-direction:column; gap:8px; }
+    .tiny { font-size:12px; color:var(--muted); }
+    .muted { color:var(--muted); }
+    .panel-inline { padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--card-bg); }
+    .list-item { display:flex; justify-content:space-between; gap:8px; align-items:flex-start; padding:8px; border-radius:8px; border:1px solid rgba(255,255,255,0.03); margin-bottom:8px; }
+    .list-actions { display:flex; gap:6px; flex-direction:column; }
+    .small-link { color:var(--text); text-decoration:underline; font-size:13px; }
   </style>
 </head>
 <body>
-<div class="container">
-  <div id="loginPanel" class="panel">
-    <h2>Admin Login</h2>
-    <div class="form-row">
-      <input id="email" class="input" placeholder="Admin email" type="email">
-      <input id="password" class="input" placeholder="Password" type="password">
-      <button id="loginBtn" class="btn">Login</button>
+  <div class="container">
+    <!-- LOGIN -->
+    <div id="loginPanel" class="panel">
+      <h2>Admin Login</h2>
+      <div class="form-row">
+        <input id="email" class="input" placeholder="Admin email (example: you@example.com)" type="email" />
+        <input id="password" class="input" placeholder="Password" type="password" />
+        <button id="loginBtn" class="btn">Login</button>
+      </div>
+      <div id="loginMsg" class="note"></div>
+      <div class="note">Nothing admin loads until you log in. Make sure the logged-in UID is listed under <code>/admins</code>.</div>
     </div>
-    <div id="loginMsg" class="note"></div>
-    <div class="note">Click the lock on the main page to open this. Nothing admin loads until you log in.</div>
+
+    <!-- ADMIN UI -->
+    <div id="adminUI" style="display:none;">
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+          <div>
+            <h2>Admin Panel</h2>
+            <div class="small">Add / edit / delete bookmarks and categories. Changes update in realtime.</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <div id="currentUser" class="tiny muted">Signed out</div>
+            <button id="logoutBtn" class="btn">Logout</button>
+          </div>
+        </div>
+
+        <hr />
+
+        <!-- Add / Edit Bookmark -->
+        <h3>Add or Edit Bookmark</h3>
+        <div class="panel-inline">
+          <div class="form-row">
+            <input id="bTitle" class="input" placeholder="Title (required)" />
+            <input id="bUrl" class="input" placeholder="Direct URL (optional)" />
+          </div>
+
+          <div class="form-row" style="margin-top:8px;">
+            <input id="bCode" class="input" placeholder="One-line code/bookmarklet (one-liner) - optional" />
+            <input id="bCats" class="input" placeholder="Categories (comma separated keys)" />
+          </div>
+
+          <div class="form-row" style="margin-top:8px;">
+            <input id="bCredits" class="input" placeholder="Credits link (optional)" />
+            <label style="color:var(--text); display:flex; align-items:center; gap:8px;">
+              <input id="bFeatured" type="checkbox" /> Featured
+            </label>
+          </div>
+
+          <div class="form-row" style="margin-top:8px;">
+            <button id="saveBookmark" class="btn">Save</button>
+            <button id="clearForm" class="btn">Clear</button>
+            <div id="bmMsg" class="tiny muted"></div>
+          </div>
+
+          <div class="tiny muted" style="margin-top:6px;">
+            Notes: code must be a single line, or leave code empty and use URL. Categories must be category keys (create below).
+          </div>
+        </div>
+
+        <hr />
+
+        <!-- Categories -->
+        <h3>Categories</h3>
+        <div class="panel-inline">
+          <div class="form-row">
+            <input id="catKey" class="input" placeholder="Category key (no spaces, required)" />
+            <input id="catName" class="input" placeholder="Category display name (required)" />
+            <button id="addCat" class="btn">Add / Update Category</button>
+            <button id="refreshCats" class="btn">Refresh</button>
+          </div>
+          <div id="categoriesList" style="margin-top:10px;"></div>
+        </div>
+
+        <hr />
+
+        <!-- Existing Bookmarks -->
+        <h3>Existing Bookmarks</h3>
+        <div id="adminList" class="col" style="margin-top:8px;"></div>
+
+      </div>
+    </div>
   </div>
 
-  <div id="adminUI" style="display:none;">
-    <div class="panel">
-      <h2>Admin Panel</h2>
-      <div class="small">Add / edit / delete bookmarks and categories. Changes update in realtime.</div>
-      <hr>
-      <!-- Bookmark form, categories, admin list etc. go here (same as your previous HTML) -->
-      <button id="logoutBtn" class="btn">Logout</button>
-    </div>
-  </div>
-</div>
+  <script type="module">
+  // Full admin.html JS - all functions implemented
+  import { auth, db } from './firebase-config.js';
+  import {
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
 
-<script type="module">
-import { auth, db } from './firebase-config.js';
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
-import { ref, get } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
+  import {
+    ref,
+    onValue,
+    push,
+    set,
+    update,
+    remove,
+    get,
+    runTransaction
+  } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 
-const loginPanel = document.getElementById('loginPanel');
-const loginMsg = document.getElementById('loginMsg');
-const adminUI = document.getElementById('adminUI');
-const loginBtn = document.getElementById('loginBtn');
-const emailEl = document.getElementById('email');
-const passEl = document.getElementById('password');
-const logoutBtn = document.getElementById('logoutBtn');
+  // Elements
+  const loginPanel = document.getElementById('loginPanel');
+  const loginMsg = document.getElementById('loginMsg');
+  const adminUI = document.getElementById('adminUI');
+  const loginBtn = document.getElementById('loginBtn');
+  const emailEl = document.getElementById('email');
+  const passEl = document.getElementById('password');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const currentUserEl = document.getElementById('currentUser');
 
-// LOGIN
-loginBtn.addEventListener('click', async () => {
-  loginMsg.textContent = '';
-  try {
-    const cred = await signInWithEmailAndPassword(auth, emailEl.value.trim(), passEl.value);
-    const uid = cred.user.uid;
-    // verify admin node exists
-    const snap = await get(ref(db, `admins/${uid}`));
-    if(!snap.exists()){
-      await signOut(auth);
-      loginMsg.textContent = 'Not an admin.';
-      return;
+  // Bookmark form elements
+  const bTitle = document.getElementById('bTitle');
+  const bUrl = document.getElementById('bUrl');
+  const bCode = document.getElementById('bCode');
+  const bCats = document.getElementById('bCats');
+  const bCredits = document.getElementById('bCredits');
+  const bFeatured = document.getElementById('bFeatured');
+  const saveBookmark = document.getElementById('saveBookmark');
+  const clearForm = document.getElementById('clearForm');
+  const bmMsg = document.getElementById('bmMsg');
+
+  // Categories
+  const catKey = document.getElementById('catKey');
+  const catName = document.getElementById('catName');
+  const addCat = document.getElementById('addCat');
+  const refreshCats = document.getElementById('refreshCats');
+  const categoriesList = document.getElementById('categoriesList');
+
+  // Admin list
+  const adminList = document.getElementById('adminList');
+
+  // State
+  let editingId = null;
+  let bookmarksCache = {};
+  let categoriesCache = {};
+
+  // --- LOGIN ---
+  loginBtn.addEventListener('click', async () => {
+    loginMsg.textContent = '';
+    try {
+      const cred = await signInWithEmailAndPassword(auth, emailEl.value.trim(), passEl.value);
+      const uid = cred.user.uid;
+
+      // Check admin node existence (rules must allow a user to read their own admin node)
+      const snap = await get(ref(db, `admins/${uid}`));
+      if(!snap.exists()){
+        await signOut(auth);
+        loginMsg.textContent = 'Not an admin.';
+        return;
+      }
+
+      // success
+      loginMsg.textContent = '';
+      emailEl.value = '';
+      passEl.value = '';
+      // UI will update via onAuthStateChanged
+    } catch (err) {
+      console.error('Login error', err);
+      // Friendly error messages
+      let msg = 'Login failed.';
+      if(err && err.code){
+        if(err.code === 'auth/wrong-password') msg = 'Wrong password.';
+        else if(err.code === 'auth/user-not-found') msg = 'No user found for this email.';
+        else if(err.code === 'auth/invalid-email') msg = 'Invalid email format.';
+        else msg = err.message || msg;
+      }
+      loginMsg.textContent = msg;
     }
+  });
+
+  // --- AUTH STATE ---
+  onAuthStateChanged(auth, async (user) => {
+    if(user){
+      const uid = user.uid;
+      currentUserEl.textContent = `Signed in: ${uid}`;
+      // verify admin node (should be allowed by rules for own node)
+      try {
+        const snap = await get(ref(db, `admins/${uid}`));
+        if(snap.exists()){
+          showAdminUI();
+        } else {
+          // not admin: auto sign out
+          await signOut(auth);
+          currentUserEl.textContent = 'Signed out';
+          alert('User is not an admin.');
+          hideAdminUI();
+        }
+      } catch(e){
+        // If read is blocked, rules may be wrong. Show message.
+        console.error('Admin check error', e);
+        loginMsg.textContent = 'Could not verify admin node. Check DB rules.';
+        hideAdminUI();
+      }
+    } else {
+      currentUserEl.textContent = 'Signed out';
+      hideAdminUI();
+    }
+  });
+
+  function showAdminUI(){
     loginPanel.style.display = 'none';
     adminUI.style.display = 'block';
-  } catch(err){
-    loginMsg.textContent = 'Login failed: ' + err.message;
+    // Start realtime listeners
+    startRealtime();
   }
-});
+  function hideAdminUI(){
+    adminUI.style.display = 'none';
+    loginPanel.style.display = 'block';
+    stopRealtime();
+  }
 
-// AUTH STATE
-onAuthStateChanged(auth, async (user) => {
-  if(user){
-    const uid = user.uid;
-    const snap = await get(ref(db, `admins/${uid}`));
-    if(snap.exists()){
-      loginPanel.style.display = 'none';
-      adminUI.style.display = 'block';
-    } else {
-      await signOut(auth).catch(()=>{});
-      loginPanel.style.display = 'block';
-      adminUI.style.display = 'none';
-    }
-  } else {
+  logoutBtn.addEventListener('click', async () => {
+    await signOut(auth);
     loginPanel.style.display = 'block';
     adminUI.style.display = 'none';
-  }
-});
+  });
 
-// LOGOUT
-logoutBtn.addEventListener('click', async () => {
-  await signOut(auth);
-  loginPanel.style.display = 'block';
-  adminUI.style.display = 'none';
-});
-</script>
+  // --- REALTIME --- listeners
+  let bookmarksUnsub = null;
+  let categoriesUnsub = null;
+
+  function startRealtime(){
+    const bRef = ref(db, 'bookmarks');
+    bookmarksUnsub = onValue(bRef, (snap) => {
+      bookmarksCache = snap.val() || {};
+      renderAdminList();
+    }, (err) => {
+      console.error('bookmarks onValue error', err);
+    });
+
+    const cRef = ref(db, 'categories');
+    categoriesUnsub = onValue(cRef, (snap) => {
+      categoriesCache = snap.val() || {};
+      renderCategories();
+      renderAdminList();
+    }, (err) => {
+      console.error('categories onValue error', err);
+    });
+  }
+
+  function stopRealtime(){
+    // Firebase's onValue returns an unsubscribe callback only for modular v9 when using off; here we set to null
+    // The simplest approach is leave listeners active while page open; nothing else required.
+  }
+
+  // --- RENDER CATEGORIES ---
+  function renderCategories(){
+    categoriesList.innerHTML = '';
+    const keys = Object.keys(categoriesCache || {}).sort();
+    if(keys.length === 0){
+      categoriesList.innerHTML = '<div class="tiny muted">No categories yet.</div>';
+      return;
+    }
+    keys.forEach(k => {
+      const item = categoriesCache[k];
+      const div = document.createElement('div');
+      div.className = 'list-item';
+      div.innerHTML = `
+        <div>
+          <div style="font-weight:600;">${escapeHtml(item.name || k)} <span class="tiny muted">(${escapeHtml(k)})</span></div>
+          <div class="tiny muted">Added: ${item.createdAt ? new Date(item.createdAt).toLocaleString() : '—'}</div>
+        </div>
+        <div class="list-actions">
+          <button class="btn edit-cat" data-key="${escapeHtml(k)}">Edit</button>
+          <button class="btn del-cat" data-key="${escapeHtml(k)}">Delete</button>
+        </div>
+      `;
+      categoriesList.appendChild(div);
+    });
+
+    // attach handlers
+    categoriesList.querySelectorAll('.edit-cat').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.key;
+        const item = categoriesCache[key] || {};
+        catKey.value = key;
+        catName.value = item.name || '';
+        // note: adding with same key will update
+      });
+    });
+
+    categoriesList.querySelectorAll('.del-cat').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const key = btn.dataset.key;
+        const ok = confirm(`Delete category "${key}"? Bookmarks will still reference this key (you may want to update them).`);
+        if(!ok) return;
+        try {
+          await remove(ref(db, `categories/${key}`));
+          alert('Category removed.');
+        } catch(err){
+          console.error('del category error', err);
+          alert('Failed to delete category: ' + (err.message || err));
+        }
+      });
+    });
+  }
+
+  // --- ADD / UPDATE CATEGORY ---
+  addCat.addEventListener('click', async () => {
+    const key = (catKey.value || '').trim();
+    const name = (catName.value || '').trim();
+    if(!key || !name){
+      alert('Please provide both a category key and display name.');
+      return;
+    }
+    try {
+      await set(ref(db, `categories/${key}`), { name, createdAt: Date.now() });
+      catKey.value = '';
+      catName.value = '';
+      alert('Category added/updated.');
+    } catch(err){
+      console.error('addCat error', err);
+      alert('Failed to add category: ' + (err.message || err));
+    }
+  });
+
+  refreshCats.addEventListener('click', () => {
+    renderCategories();
+  });
+
+  // --- RENDER / ADMIN LIST (Bookmarks) ---
+  function renderAdminList(){
+    adminList.innerHTML = '';
+    const entries = Object.entries(bookmarksCache || {}).sort((a,b)=> (b[1].createdAt||0) - (a[1].createdAt||0));
+    if(entries.length === 0){
+      adminList.innerHTML = '<div class="tiny muted">No bookmarks yet.</div>';
+      return;
+    }
+
+    entries.forEach(([id, item]) => {
+      const cats = (item.categories || item.category || []).join ? (item.categories || []) : (Array.isArray(item.categories) ? item.categories : []);
+      const catNames = (cats || []).map(k => categoriesCache[k] ? categoriesCache[k].name : k).filter(Boolean).join(', ');
+      const div = document.createElement('div');
+      div.className = 'list-item';
+      div.innerHTML = `
+        <div style="max-width:72%;">
+          <div style="font-weight:600;">${escapeHtml(item.title || 'Untitled')}</div>
+          <div class="tiny muted">${escapeHtml(item.desc || '')}</div>
+          <div class="tiny muted">URL: ${escapeHtml(item.url || '')}</div>
+          <div class="tiny muted">Code: ${escapeHtml(item.code || '')}</div>
+          <div class="tiny muted">Cats: ${escapeHtml(catNames || (cats || []).join(', '))}</div>
+          <div class="tiny muted">Popularity: ${item.popularity || 0} • Created: ${item.createdAt ? new Date(item.createdAt).toLocaleString() : '—'}</div>
+        </div>
+        <div class="list-actions">
+          <button class="btn edit-bm" data-id="${id}">Edit</button>
+          <button class="btn del-bm" data-id="${id}">Delete</button>
+        </div>
+      `;
+      adminList.appendChild(div);
+    });
+
+    // attach handlers
+    adminList.querySelectorAll('.edit-bm').forEach(btn => {
+      btn.addEventListener('click', () => {
+        startEdit(btn.dataset.id);
+      });
+    });
+    adminList.querySelectorAll('.del-bm').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        const ok = confirm('Delete this bookmark? This cannot be undone.');
+        if(!ok) return;
+        try {
+          await remove(ref(db, `bookmarks/${id}`));
+          alert('Deleted.');
+        } catch(err){
+          console.error('delete bookmark error', err);
+          alert('Failed to delete bookmark: ' + (err.message || err));
+        }
+      });
+    });
+  }
+
+  // --- START EDIT ---
+  function startEdit(id){
+    const b = bookmarksCache[id];
+    if(!b) return;
+    editingId = id;
+    bTitle.value = b.title || '';
+    bUrl.value = b.url || '';
+    bCode.value = b.code || '';
+    bCats.value = (b.categories || b.category || []).join ? (b.categories || []).join(',') : (b.categories || b.category || '');
+    bCredits.value = b.creditsLink || '';
+    bFeatured.checked = !!b.featured;
+    bmMsg.textContent = 'Editing bookmark — make changes and press Save.';
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  // --- SAVE BOOKMARK (ADD or UPDATE) ---
+  saveBookmark.addEventListener('click', async () => {
+    bmMsg.textContent = '';
+    saveBookmark.disabled = true;
+    const title = bTitle.value.trim();
+    const url = bUrl.value.trim();
+    const code = bCode.value.trim();
+    const catsRaw = bCats.value.trim();
+    const categoriesArr = catsRaw ? catsRaw.split(',').map(s=>s.trim()).filter(Boolean) : [];
+    const credits = bCredits.value.trim();
+    const featured = bFeatured.checked;
+
+    // validation
+    if(!title || (!url && !code)){
+      alert('Please provide a title and either a URL or one-line code/bookmarklet.');
+      saveBookmark.disabled = false;
+      return;
+    }
+    if(code && code.split(/\r\n|\r|\n/).length > 1){
+      alert('Bookmarklet/code must be a single line (one-liner). Remove line breaks.');
+      saveBookmark.disabled = false;
+      return;
+    }
+
+    const payload = {
+      title,
+      desc: '',
+      url: url || '',
+      code: code || '',
+      categories: categoriesArr,
+      creditsLink: credits || '',
+      featured: !!featured,
+      popularity: editingId ? (bookmarksCache[editingId]?.popularity || 0) : 0,
+      createdAt: editingId ? (bookmarksCache[editingId]?.createdAt || Date.now()) : Date.now()
+    };
+
+    try {
+      if(editingId){
+        await update(ref(db, `bookmarks/${editingId}`), payload);
+        alert('Updated.');
+        editingId = null;
+      } else {
+        const newRef = push(ref(db, 'bookmarks'));
+        await set(newRef, payload);
+        alert('Added.');
+      }
+      // clear
+      bTitle.value = bUrl.value = bCode.value = bCats.value = bCredits.value = '';
+      bFeatured.checked = false;
+      bmMsg.textContent = '';
+    } catch(err){
+      console.error('save bookmark error', err);
+      alert('Failed to save bookmark: ' + (err.message || err));
+    } finally {
+      saveBookmark.disabled = false;
+    }
+  });
+
+  clearForm.addEventListener('click', ()=> {
+    editingId = null;
+    bTitle.value = bUrl.value = bCode.value = bCats.value = bCredits.value = '';
+    bFeatured.checked = false;
+    bmMsg.textContent = '';
+  });
+
+  // --- helper: escape HTML ---
+  function escapeHtml(s){ if(s === null || s === undefined) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+  // initial: nothing until login triggers realtime listeners
+  </script>
 </body>
 </html>
