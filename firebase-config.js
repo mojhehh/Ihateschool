@@ -1,7 +1,5 @@
-// firebase-config.js
-// Put this in the repo root next to index.html and admin.html
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-import { getDatabase } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
+import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -18,3 +16,13 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const db = getDatabase(app);
 export const auth = getAuth(app);
+
+// --- Auto-create bookmarks node if it doesn't exist ---
+(async () => {
+  const bookmarksRef = ref(db, 'bookmarks');
+  const snap = await get(bookmarksRef);
+  if (!snap.exists()) {
+    await set(bookmarksRef, {}); // create empty bookmarks node
+    console.log('Created empty bookmarks node in Firebase.');
+  }
+})();
