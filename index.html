@@ -5,6 +5,32 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Veltra</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Toast styling overrides */
+    .toast {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 14px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: #000000;
+      color: #ffffff;
+      box-shadow: 0 10px 30px rgba(255,255,255,0.12);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .toast .link {
+      color: #ffffff;
+      text-decoration: underline;
+      font-weight: 700;
+      transition: text-shadow 0.2s ease;
+    }
+    .toast .link:hover {
+      text-shadow: 0 0 8px rgba(255,255,255,0.3);
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -47,7 +73,7 @@
 
   <script type="module">
     import { db } from './firebase-config.js';
-    import { ref, onValue, runTransaction, get } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
+    import { ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 
     // elements
     const grid = document.getElementById('grid');
@@ -144,7 +170,6 @@
       const arr = Object.entries(bookmarks).map(([id,b]) => {
         const item = Object.assign({}, b);
         item._id = id;
-        // normalize categories
         if(!item.categories){
           if(item.category) item.categories = Array.isArray(item.category) ? item.category : [item.category];
           else item.categories = [];
@@ -153,13 +178,11 @@
       });
 
       let filtered = arr.filter(b => {
-        // categories multiple selection
         if(selectedCats.size > 0){
           const bkCats = (b.categories || []).map(String);
           const any = Array.from(selectedCats).some(s => bkCats.includes(s));
           if(!any) return false;
         }
-        // search
         if(lastSearchTerm){
           const text = ((b.title||'') + ' ' + (b.desc||'') + ' ' + (b.categories||[]).join(' ')).toLowerCase();
           return text.includes(lastSearchTerm);
@@ -167,7 +190,6 @@
         return true;
       });
 
-      // sort
       if(currentSort === 'popular'){
         filtered.sort((a,b)=> (b.popularity||0) - (a.popularity||0));
       } else if(currentSort === 'alpha'){
@@ -203,8 +225,7 @@
         copyBtn.addEventListener('click', async ()=>{
           try {
             await navigator.clipboard.writeText(b.code || b.url || '');
-            showToast('✅ Copied! Visit the <span class="link">instructions page</span> to install the bookmark.');
-            // increment popularity safely
+            showToast('✅ Copied! Visit <a href="https://github.com/mojhehh/Ihateschool/blob/3a538108dd9a303cecee280d22ecd5a09ca70f37/instructions.html" class="link" target="_blank">instructions</a> to install the bookmark.');
             const pRef = ref(db, `bookmarks/${b._id}/popularity`);
             runTransaction(pRef, (curr) => (curr||0) + 1);
           } catch(err){
@@ -225,7 +246,13 @@
       }, 2400);
     }
 
-    function escapeHtml(s){ if(!s) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+    function escapeHtml(s){ 
+      if(!s) return ''; 
+      return String(s)
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;'); 
+    }
   </script>
 </body>
 </html>
