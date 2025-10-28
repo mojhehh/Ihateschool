@@ -6,13 +6,13 @@
   <title>Veltra</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* Toast styling overrides */
+    /* Toast styling */
     .toast {
       position: fixed;
       left: 50%;
       transform: translateX(-50%);
       top: 14px;
-      padding: 10px 16px;
+      padding: 12px 18px;
       border-radius: 999px;
       background: #000000;
       color: #ffffff;
@@ -29,6 +29,27 @@
     }
     .toast .link:hover {
       text-shadow: 0 0 8px rgba(255,255,255,0.3);
+    }
+
+    /* Bigger copy button styling */
+    .copy-square {
+      width: 50px;
+      height: 50px;
+      font-size: 22px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      background: transparent;
+      color: var(--text);
+      font-weight: 700;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .copy-square:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 10px var(--glow);
     }
   </style>
 </head>
@@ -150,7 +171,6 @@
       renderGrid();
     });
 
-    // search behavior: apply on Enter
     searchInput.addEventListener('keydown', (e) => {
       if(e.key === 'Enter'){
         lastSearchTerm = searchInput.value.trim().toLowerCase();
@@ -158,13 +178,11 @@
       }
     });
 
-    // sort
     sortSelect.addEventListener('change', ()=> {
       currentSort = sortSelect.value;
       renderGrid();
     });
 
-    // render grid
     function renderGrid(){
       grid.innerHTML = '';
       const arr = Object.entries(bookmarks).map(([id,b]) => {
@@ -216,8 +234,7 @@
           </div>
           <div class="desc">${escapeHtml(b.desc||'')}</div>
           <div class="actions">
-            <button class="copy-square" title="Copy">⧉</button>
-            <a class="small" target="_blank" href="${escapeHtml(b.url||'#')}">Open</a>
+            <button class="copy-square" title="Copy">📋</button>
             ${b.creditsLink ? `<a class="small" target="_blank" href="${escapeHtml(b.creditsLink)}">Credits</a>` : ''}
           </div>
         `;
@@ -225,7 +242,7 @@
         copyBtn.addEventListener('click', async ()=>{
           try {
             await navigator.clipboard.writeText(b.code || b.url || '');
-            showToast('✅ Copied! Visit <a href="https://github.com/mojhehh/Ihateschool/blob/3a538108dd9a303cecee280d22ecd5a09ca70f37/instructions.html" class="link" target="_blank">instructions</a> to install the bookmark.');
+            showToast('✅ Copied! Visit <a href="instructions.html" class="link" target="_blank">instructions</a> to install the bookmark.');
             const pRef = ref(db, `bookmarks/${b._id}/popularity`);
             runTransaction(pRef, (curr) => (curr||0) + 1);
           } catch(err){
