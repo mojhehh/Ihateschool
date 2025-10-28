@@ -14,50 +14,53 @@
       top: 14px;
       padding: 12px 18px;
       border-radius: 999px;
-      background: #000;
-      color: #fff;
+      background: #000000;
+      color: #ffffff;
       box-shadow: 0 10px 30px rgba(255,255,255,0.12);
       z-index: 999;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.3s ease;
     }
-    .toast.show { opacity: 1; }
+    .toast.show {
+      opacity: 1;
+    }
     .toast .link {
-      color: #fff;
+      color: #ffffff;
       text-decoration: underline;
       font-weight: 700;
       transition: text-shadow 0.2s ease;
     }
-    .toast .link:hover { text-shadow: 0 0 8px rgba(255,255,255,0.3); }
+    .toast .link:hover {
+      text-shadow: 0 0 8px rgba(255,255,255,0.3);
+    }
 
     /* Copy button styling */
     .copy-square {
-      width: 42px;
-      height: 42px;
-      font-size: 20px;
-      border-radius: 8px;
+      width: 50px;
+      height: 50px;
+      font-size: 22px;
+      border-radius: 10px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid var(--border,#aaa);
+      border: 1px solid var(--border);
       cursor: pointer;
-      background: #111;
-      color: #fff;
+      background: transparent;
+      color: var(--text);
       font-weight: 700;
-      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
     .copy-square:hover {
-      transform: translateY(-2px) scale(1.05);
-      box-shadow: 0 0 8px rgba(255,255,255,0.3);
-      background: #222;
+      transform: translateY(-2px);
+      box-shadow: 0 0 10px var(--glow);
     }
 
-    /* Lock button styling */
+    /* Lock button always visible */
     #lockBtn {
       position: fixed;
       top: 16px;
-      right: -50px;
+      right: 16px;
       width: 36px;
       height: 36px;
       padding: 0;
@@ -65,24 +68,16 @@
       background: transparent;
       cursor: pointer;
       z-index: 1000;
-      opacity: 0.3;
-      transition: right 0.3s ease, opacity 0.3s ease, transform 0.2s ease;
-    }
-    #lockBtn img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
+      opacity: 0.5;
+      transition: opacity 0.2s ease, transform 0.2s ease;
     }
     #lockBtn:hover {
       transform: scale(1.2);
       opacity: 1;
     }
-    /* Slide in when top-controls hovered */
-    .top-controls:hover + #lockBtn,
-    .top-controls:hover ~ #lockBtn {
-      right: 16px;
-      opacity: 1;
+    #lockBtn img {
+      width: 100%;
+      height: 100%;
     }
   </style>
 </head>
@@ -132,6 +127,7 @@
     import { db } from './firebase-config.js';
     import { ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 
+    // elements
     const grid = document.getElementById('grid');
     const toast = document.getElementById('toast');
     const toastText = document.getElementById('toastText');
@@ -146,15 +142,21 @@
     lockBtn.addEventListener('click', ()=> location.href = 'admin.html');
     instructionsBtn.addEventListener('click', ()=> location.href = 'instructions.html');
 
-    let bookmarks = {}, categories = {}, selectedCats = new Set();
-    let currentSort = sortSelect.value, lastSearchTerm = '';
+    // state
+    let bookmarks = {};
+    let categories = {};
+    let selectedCats = new Set();
+    let currentSort = sortSelect.value;
+    let lastSearchTerm = '';
 
+    // load categories (realtime)
     const catsRef = ref(db, 'categories');
     onValue(catsRef, snap => {
       categories = snap.val() || {};
       renderCategoryChips();
     });
 
+    // load bookmarks (realtime)
     const bmRef = ref(db, 'bookmarks');
     onValue(bmRef, snap => {
       bookmarks = snap.val() || {};
@@ -215,55 +217,68 @@
     function renderGrid(){
       grid.innerHTML = '';
       const arr = Object.entries(bookmarks).map(([id,b]) => {
-        const item = {...b, _id:id};
+        const item = Object.assign({}, b);
+        item._id = id;
         if(!item.categories){
-          item.categories = item.category ? (Array.isArray(item.category)? item.category : [item.category]) : [];
+          if(item.category) item.categories = Array.isArray(item.category) ? item.category : [item.category];
+          else item.categories = [];
         }
         return item;
       });
 
       let filtered = arr.filter(b => {
-        if(selectedCats.size>0){
-          const bkCats = (b.categories||[]).map(String);
-          if(!Array.from(selectedCats).some(s=>bkCats.includes(s))) return false;
+        if(selectedCats.size > 0){
+          const bkCats = (b.categories || []).map(String);
+          const any = Array.from(selectedCats).some(s => bkCats.includes(s));
+          if(!any) return false;
         }
         if(lastSearchTerm){
-          const text = ((b.title||'')+' '+(b.desc||'')+' '+(b.categories||[]).join(' ')).toLowerCase();
+          const text = ((b.title||'') + ' ' + (b.desc||'') + ' ' + (b.categories||[]).join(' ')).toLowerCase();
           return text.includes(lastSearchTerm);
         }
         return true;
       });
 
-      if(currentSort==='popular') filtered.sort((a,b)=> (b.popularity||0)-(a.popularity||0));
-      else if(currentSort==='alpha') filtered.sort((a,b)=> (a.title||'').localeCompare(b.title||''));
-      else filtered.sort((a,b)=> (b.createdAt||0)-(a.createdAt||0));
+      if(currentSort === 'popular'){
+        filtered.sort((a,b)=> (b.popularity||0) - (a.popularity||0));
+      } else if(currentSort === 'alpha'){
+        filtered.sort((a,b)=> (a.title||'').localeCompare(b.title||''));
+      } else {
+        filtered.sort((a,b)=> (b.createdAt||0) - (a.createdAt||0));
+      }
 
-      if(filtered.length===0){ document.getElementById('placeholder').style.display='block'; return; }
-      else document.getElementById('placeholder').style.display='none';
+      if(filtered.length === 0){
+        document.getElementById('placeholder').style.display = 'block';
+        return;
+      } else {
+        document.getElementById('placeholder').style.display = 'none';
+      }
 
-      filtered.forEach(b=>{
+      filtered.forEach(b => {
         const card = document.createElement('div');
-        card.className='card';
-        const catNames = (b.categories||[]).map(k=> categories[k]?categories[k].name:k).filter(Boolean);
-        card.innerHTML=`
+        card.className = 'card';
+        const catNames = (b.categories || []).map(k => categories[k] ? categories[k].name : k).filter(Boolean);
+        card.innerHTML = `
           <div class="card-head">
             <div class="titleSmall">${escapeHtml(b.title||'Untitled')}</div>
-            <div class="catTag">${escapeHtml(catNames.join(', ')||'General')}</div>
+            <div class="catTag">${escapeHtml(catNames.join(', ') || 'General')}</div>
           </div>
           <div class="desc">${escapeHtml(b.desc||'')}</div>
           <div class="actions">
             <button class="copy-square" title="Copy">📋</button>
-            ${b.creditsLink? `<a class="small" target="_blank" href="${escapeHtml(b.creditsLink)}">Credits</a>`: ''}
+            ${b.creditsLink ? `<a class="small" target="_blank" href="${escapeHtml(b.creditsLink)}">Credits</a>` : ''}
           </div>
         `;
         const copyBtn = card.querySelector('.copy-square');
-        copyBtn.addEventListener('click', async ()=>{
-          try{
-            await navigator.clipboard.writeText(b.code||b.url||'');
+        copyBtn.addEventListener('click', async ()=> {
+          try {
+            await navigator.clipboard.writeText(b.code || b.url || '');
             showToast('✅ Copied! Visit <a href="instructions.html" class="link" target="_blank">instructions</a> to install the bookmark.');
             const pRef = ref(db, `bookmarks/${b._id}/popularity`);
-            runTransaction(pRef, curr => (curr||0)+1);
-          } catch(err){ showToast('✖ Copy failed — select and copy manually.'); }
+            runTransaction(pRef, (curr) => (curr||0) + 1);
+          } catch(err){
+            showToast('✖ Copy failed — select and copy manually.');
+          }
         });
         grid.appendChild(card);
       });
@@ -272,12 +287,17 @@
     function showToast(html){
       toastText.innerHTML = html;
       toast.classList.add('show');
-      setTimeout(()=> toast.classList.remove('show'), 2400);
+      setTimeout(()=> {
+        toast.classList.remove('show');
+      }, 2400);
     }
 
-    function escapeHtml(s){
-      if(!s) return '';
-      return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+    function escapeHtml(s){ 
+      if(!s) return ''; 
+      return String(s)
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;'); 
     }
   </script>
 </body>
