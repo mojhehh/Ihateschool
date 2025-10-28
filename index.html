@@ -1,220 +1,245 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Veltra</title>
-  <style>
-    :root{
-      --bg: #000000;
-      --text: #ffffff;
-      --muted: rgba(255,255,255,0.65);
-      --border: rgba(255,255,255,0.12);
-      --glow: rgba(255,255,255,0.12);
-      --card-bg: rgba(255,255,255,0.02);
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Veltra</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  /* Toast */
+  .toast { position: fixed; left:50%; transform:translateX(-50%); top:14px; padding:12px 18px; border-radius:999px; background:#000; color:#fff; box-shadow:0 10px 30px rgba(255,255,255,0.12); z-index:999; opacity:0; pointer-events:none; transition:opacity 0.3s ease;}
+  .toast.show{opacity:1;}
+  .toast .link{color:#fff;text-decoration:underline;font-weight:700;}
+  .toast .link:hover{text-shadow:0 0 8px rgba(255,255,255,0.3);}
 
-    html,body { height:100%; margin:0; background:var(--bg); color:var(--text); font-family: Inter, "Segoe UI", Roboto, system-ui, -apple-system, Arial; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
-    a { color:var(--text); text-decoration: underline; }
-    a:visited, a:hover, a:active { color:var(--text); }
+  /* Copy button */
+  .copy-square{width:50px;height:50px;font-size:22px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);cursor:pointer;background:transparent;color:var(--text);font-weight:700;transition: transform 0.15s ease, box-shadow 0.15s ease;}
+  .copy-square:hover{transform:translateY(-2px);box-shadow:0 0 10px var(--glow);}
 
-    .container{ max-width:1100px; margin:18px auto; padding:14px; }
-    .header{ display:flex; align-items:center; gap:12px; padding:8px 0; }
-    .logo { width:48px; height:48px; border-radius:8px; display:flex; align-items:center; justify-content:center; border:1px solid var(--border); background: #070707 url('black-and-white-geometric-logos-1 (1).png') center/contain no-repeat; font-weight:700; font-size:20px; color:var(--text); box-shadow:0 6px 18px var(--glow); text-indent:-9999px; }
-    .title{ font-size:20px; font-weight:600; }
-    .tag{ color:var(--muted); font-size:13px; margin-top:2px; }
+  /* Lock button always visible */
+  #lockBtn{position:fixed;top:16px;right:16px;width:36px;height:36px;cursor:pointer;z-index:1000;opacity:0.7;transition:opacity 0.2s ease, transform 0.2s ease;}
+  #lockBtn img{display:block;width:100%;height:100%;}
+  #lockBtn:hover{transform:scale(1.2);opacity:1;}
 
-    .controls{ margin-left:auto; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    .search{ background:transparent; border:1px solid var(--border); padding:8px 12px; border-radius:8px; color:var(--text); min-width:220px; }
-    .search::placeholder{ color:var(--muted); }
-    .select, .btn { background:transparent; border:1px solid var(--border); color:var(--text); padding:8px 10px; border-radius:8px; cursor:pointer; }
-    .select:focus, .btn:focus, .search:focus { outline:none; box-shadow:0 0 8px var(--glow); }
+  /* Fullscreen instructions overlay */
+  #instructionsOverlay{
+    position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); color:var(--text); z-index:2000; display:none; flex-direction:column; overflow:auto;
+  }
+  #instructionsOverlay .header{padding:14px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border);}
+  #instructionsOverlay .content{padding:20px; font-size:16px; line-height:1.5; max-width:800px; margin:auto;}
+  #instructionsOverlay .backBtn{padding:8px 12px; border:1px solid var(--border); border-radius:8px; background:transparent; color:var(--text); cursor:pointer; font-weight:600;}
 
-    .top-controls{ display:flex; justify-content:space-between; gap:12px; align-items:center; margin-top:10px; flex-wrap:wrap; }
-    .filter-row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-    .small{ font-size:13px; color:var(--muted); }
-
-    .cat-chips{ display:flex; gap:8px; flex-wrap:wrap; }
-    .cat-chip{ padding:6px 10px; border-radius:999px; border:1px solid var(--border); cursor:pointer; background:transparent; color:var(--text); font-size:13px; }
-    .cat-chip.selected{ box-shadow:0 0 8px var(--glow); transform:translateY(-2px); }
-
-    .grid{ display:grid; grid-template-columns: repeat(auto-fill,minmax(240px,1fr)); gap:14px; margin-top:14px; }
-    .card{ border:1px solid var(--border); padding:12px; border-radius:10px; background:var(--card-bg); transition: transform .18s ease, box-shadow .18s ease; transform-origin:center; }
-    .card:hover{ transform: translateY(-6px) scale(1.01); box-shadow:0 10px 30px var(--glow); }
-    .card-head{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
-    .titleSmall{ font-weight:600; }
-    .catTag{ font-size:12px; padding:6px; border-radius:8px; border:1px solid var(--border); color:var(--text); background:transparent; }
-    .desc{ color:var(--muted); font-size:13px; margin:8px 0; min-height:38px; }
-
-    .actions{ display:flex; gap:8px; align-items:center; }
-    .copy-square{ width:44px; height:44px; border-radius:8px; border:1px solid var(--border); display:inline-flex; align-items:center; justify-content:center; cursor:pointer; background:transparent; color:var(--text); font-weight:700; font-size:20px; }
-    .copy-square:hover{ box-shadow:0 0 10px var(--glow); transform: translateY(-2px); }
-
-    /* toast */
-    .toast{ position:fixed; left:50%; transform:translateX(-50%); top:14px; padding:12px 18px; border-radius:999px; background: #000; color: #fff; box-shadow:0 10px 30px rgba(255,255,255,0.12); z-index:999; opacity:0; pointer-events:none; transition:opacity 0.3s ease; }
-    .toast.show{ opacity:1; }
-    .toast .link{ color:#fff; text-decoration:underline; font-weight:700; }
-
-    .placeholder{ text-align:center; padding:40px; color:var(--muted); grid-column:1/-1; border-radius:12px; border:1px solid rgba(255,255,255,0.02); }
-
-    /* admin lock - always visible */
-    #lockBtn {
-      position: fixed;
-      top: 16px;
-      right: 16px;
-      width: 40px;
-      height: 40px;
-      border-radius:8px;
-      padding:4px;
-      border:1px solid var(--border);
-      background:transparent;
-      cursor:pointer;
-      color:var(--text);
-      z-index:1000;
-      opacity:0.8;
-      transition: transform 0.2s ease, opacity 0.2s ease;
-    }
-    #lockBtn img { width:100%; height:100%; display:block; }
-    #lockBtn:hover{ transform:scale(1.2); opacity:1; }
-
-    /* responsive tweaks for iPad */
-    @media (max-width:1024px){
-      .grid { grid-template-columns: repeat(auto-fill,minmax(200px,1fr)); gap:12px; }
-      .controls { flex-direction:column; gap:8px; align-items:stretch; }
-      .search{ min-width:100%; }
-    }
-  </style>
+  /* Show categories and grid always */
+  .top-controls, .grid{display:block !important;}
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <div class="logo">V</div>
-      <div>
-        <div class="title">Veltra</div>
-        <div class="tag">Bookmarks & bookmarklets — clean & quick</div>
-      </div>
-      <div class="controls">
-        <input id="search" class="search" placeholder="Search... (press Enter to apply)">
-        <select id="sortSelect" class="select" title="Sort">
-          <option value="newest">Newest</option>
-          <option value="popular">Most popular</option>
-          <option value="alpha">Alphabetical</option>
-        </select>
-        <button id="instructionsBtn" class="btn">Instructions</button>
-      </div>
+<div class="container" id="mainContent">
+  <div class="header">
+    <div class="logo">V</div>
+    <div>
+      <div class="title">Veltra</div>
+      <div class="tag">Bookmarks & bookmarklets — clean & quick</div>
     </div>
-
-    <div class="top-controls">
-      <div class="filter-row">
-        <div class="small">Filter categories:</div>
-        <div id="catChips" class="cat-chips"></div>
-      </div>
-      <div class="controls-row">
-        <div class="small">Selected: <span id="activeCount">All</span></div>
-        <button id="clearCats" class="btn">Clear</button>
-      </div>
+    <div class="controls">
+      <input id="search" class="search" placeholder="Search... (press Enter to apply)">
+      <select id="sortSelect" class="select" title="Sort">
+        <option value="newest">Newest</option>
+        <option value="popular">Most popular</option>
+        <option value="alpha">Alphabetical</option>
+      </select>
+      <button id="instructionsBtn" class="btn">Instructions</button>
     </div>
-
-    <div id="grid" class="grid"></div>
-    <div id="placeholder" class="placeholder" style="display:none;">No bookmarks match. Try another filter.</div>
   </div>
 
-  <!-- Lock button -->
-  <button id="lockBtn">
-    <img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/4aca40ab959224fb756c3d04fe34f266d635f477/lock-icon-clipart-free-png%20(1).webp" alt="Admin Lock">
-  </button>
+  <div class="top-controls">
+    <div class="filter-row">
+      <div class="small">Filter categories:</div>
+      <div id="catChips" class="cat-chips"></div>
+    </div>
+    <div class="controls-row">
+      <div class="small">Selected: <span id="activeCount">All</span></div>
+      <button id="clearCats" class="btn">Clear</button>
+    </div>
+  </div>
 
-  <div id="toast" class="toast"><span id="toastText"></span></div>
+  <div id="grid" class="grid"></div>
+  <div id="placeholder" class="placeholder" style="display:none;">No bookmarks match. Try another filter.</div>
+</div>
 
-  <script type="module">
-    import { db } from './firebase-config.js';
-    import { ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
+<!-- Lock button -->
+<button id="lockBtn">
+  <img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/4aca40ab959224fb756c3d04fe34f266d635f477/lock-icon-clipart-free-png%20(1).webp" 
+       alt="Admin Lock">
+</button>
 
-    const grid = document.getElementById('grid');
-    const toast = document.getElementById('toast');
-    const toastText = document.getElementById('toastText');
-    const searchInput = document.getElementById('search');
-    const sortSelect = document.getElementById('sortSelect');
-    const catChips = document.getElementById('catChips');
-    const clearCats = document.getElementById('clearCats');
-    const activeCount = document.getElementById('activeCount');
-    const instructionsBtn = document.getElementById('instructionsBtn');
-    const lockBtn = document.getElementById('lockBtn');
+<div id="toast" class="toast"><span id="toastText"></span></div>
 
-    lockBtn.addEventListener('click', ()=> location.href = 'admin.html');
-    instructionsBtn.addEventListener('click', ()=> location.href = 'instructions.html');
+<!-- Instructions Overlay -->
+<div id="instructionsOverlay">
+  <div class="header">
+    <div class="title">Instructions</div>
+    <button class="backBtn" id="backBtn">Back</button>
+  </div>
+  <div class="content">
+    <h2>How to use Veltra Bookmarks</h2>
+    <p>1. Browse the bookmarks in the grid below.</p>
+    <p>2. Use categories to filter bookmarks.</p>
+    <p>3. Click the 📋 button to copy the bookmark code or URL.</p>
+    <p>4. Popular bookmarks increase their count automatically.</p>
+    <p>5. Use the search box to find bookmarks quickly.</p>
+    <p>6. Click "Back" to return to bookmarks.</p>
+  </div>
+</div>
 
-    let bookmarks = {}, categories = {}, selectedCats = new Set(), currentSort = sortSelect.value, lastSearchTerm = '';
+<script type="module">
+import { db } from './firebase-config.js';
+import { ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 
-    onValue(ref(db,'categories'), snap => { categories = snap.val()||{}; renderCategoryChips(); });
-    onValue(ref(db,'bookmarks'), snap => { bookmarks = snap.val()||{}; renderGrid(); });
+const grid = document.getElementById('grid');
+const toast = document.getElementById('toast');
+const toastText = document.getElementById('toastText');
+const searchInput = document.getElementById('search');
+const sortSelect = document.getElementById('sortSelect');
+const catChips = document.getElementById('catChips');
+const clearCats = document.getElementById('clearCats');
+const activeCount = document.getElementById('activeCount');
+const instructionsBtn = document.getElementById('instructionsBtn');
+const lockBtn = document.getElementById('lockBtn');
 
-    function renderCategoryChips(){
-      catChips.innerHTML = '';
-      const keys = Object.keys(categories).sort();
-      if(!keys.length){ catChips.innerHTML='<div class="small">No categories yet</div>'; return; }
-      keys.forEach(k=>{
-        const name = categories[k].name||k;
-        const btn=document.createElement('button');
-        btn.className='cat-chip';
-        btn.textContent=name;
-        btn.dataset.key=k;
-        btn.addEventListener('click',()=>{ selectedCats.has(k)?selectedCats.delete(k):selectedCats.add(k); updateSelectedUI(); renderGrid(); });
-        catChips.appendChild(btn);
-      });
+const instructionsOverlay = document.getElementById('instructionsOverlay');
+const backBtn = document.getElementById('backBtn');
+
+// Lock button
+lockBtn.addEventListener('click', ()=> location.href='admin.html');
+
+// Instructions overlay
+instructionsBtn.addEventListener('click', ()=>{
+  instructionsOverlay.style.display='flex';
+  document.getElementById('mainContent').style.display='none';
+});
+backBtn.addEventListener('click', ()=>{
+  instructionsOverlay.style.display='none';
+  document.getElementById('mainContent').style.display='block';
+});
+
+// State
+let bookmarks = {};
+let categories = {};
+let selectedCats = new Set();
+let currentSort = sortSelect.value;
+let lastSearchTerm = '';
+
+// Load categories
+const catsRef = ref(db,'categories');
+onValue(catsRef, snap => {
+  categories = snap.val() || {};
+  renderCategoryChips();
+});
+
+// Load bookmarks
+const bmRef = ref(db,'bookmarks');
+onValue(bmRef, snap => {
+  bookmarks = snap.val() || {};
+  renderGrid();
+});
+
+function renderCategoryChips(){
+  catChips.innerHTML='';
+  const keys = Object.keys(categories).sort();
+  if(keys.length===0){ catChips.innerHTML='<div class="small">No categories yet</div>'; return; }
+  keys.forEach(k=>{
+    const name = categories[k].name || k;
+    const btn=document.createElement('button');
+    btn.className='cat-chip';
+    btn.textContent=name;
+    btn.dataset.key=k;
+    btn.addEventListener('click',()=>{
+      selectedCats.has(k)?selectedCats.delete(k):selectedCats.add(k);
       updateSelectedUI();
+      renderGrid();
+    });
+    catChips.appendChild(btn);
+  });
+  updateSelectedUI();
+}
+
+function updateSelectedUI(){
+  Array.from(catChips.querySelectorAll('.cat-chip')).forEach(chip=>{
+    chip.classList.toggle('selected', selectedCats.has(chip.dataset.key));
+  });
+  activeCount.textContent = selectedCats.size>0 ? selectedCats.size+' selected':'All';
+}
+
+clearCats.addEventListener('click', ()=>{
+  selectedCats.clear();
+  updateSelectedUI();
+  renderGrid();
+});
+
+searchInput.addEventListener('keydown', e=>{
+  if(e.key==='Enter'){
+    lastSearchTerm=searchInput.value.trim().toLowerCase();
+    renderGrid();
+  }
+});
+
+sortSelect.addEventListener('change', ()=>{ currentSort=sortSelect.value; renderGrid(); });
+
+function renderGrid(){
+  grid.innerHTML='';
+  const arr=Object.entries(bookmarks).map(([id,b])=>{
+    const item=Object.assign({},b);
+    item._id=id;
+    if(!item.categories){ item.categories=item.category? (Array.isArray(item.category)?item.category:[item.category]):[]; }
+    return item;
+  });
+  let filtered = arr.filter(b=>{
+    if(selectedCats.size>0){
+      const bkCats=(b.categories||[]).map(String);
+      if(!Array.from(selectedCats).some(s=>bkCats.includes(s))) return false;
     }
-
-    function updateSelectedUI(){
-      Array.from(catChips.querySelectorAll('.cat-chip')).forEach(chip=>{
-        chip.classList.toggle('selected', selectedCats.has(chip.dataset.key));
-      });
-      activeCount.textContent = selectedCats.size>0?selectedCats.size+' selected':'All';
+    if(lastSearchTerm){
+      const text=((b.title||'')+' '+(b.desc||'')+' '+(b.categories||[]).join(' ')).toLowerCase();
+      return text.includes(lastSearchTerm);
     }
+    return true;
+  });
 
-    clearCats.addEventListener('click', ()=> { selectedCats.clear(); updateSelectedUI(); renderGrid(); });
-    searchInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){ lastSearchTerm=searchInput.value.trim().toLowerCase(); renderGrid(); } });
-    sortSelect.addEventListener('change', ()=>{ currentSort = sortSelect.value; renderGrid(); });
+  if(currentSort==='popular'){ filtered.sort((a,b)=> (b.popularity||0)-(a.popularity||0)); }
+  else if(currentSort==='alpha'){ filtered.sort((a,b)=> (a.title||'').localeCompare(b.title||'')); }
+  else{ filtered.sort((a,b)=> (b.createdAt||0)-(a.createdAt||0)); }
 
-    function renderGrid(){
-      grid.innerHTML='';
-      const arr=Object.entries(bookmarks).map(([id,b])=>{ const item={...b,_id:id}; if(!item.categories){ if(item.category)item.categories=Array.isArray(item.category)?item.category:[item.category]; else item.categories=[]; } return item; });
-      let filtered=arr.filter(b=>{
-        if(selectedCats.size>0){ const bkCats=(b.categories||[]).map(String); if(!Array.from(selectedCats).some(s=>bkCats.includes(s))) return false; }
-        if(lastSearchTerm){ const text=((b.title||'')+' '+(b.desc||'')+' '+(b.categories||[]).join(' ')).toLowerCase(); if(!text.includes(lastSearchTerm)) return false; }
-        return true;
-      });
+  if(filtered.length===0){ document.getElementById('placeholder').style.display='block'; return; }
+  else{ document.getElementById('placeholder').style.display='none'; }
 
-      if(currentSort==='popular') filtered.sort((a,b)=>(b.popularity||0)-(a.popularity||0));
-      else if(currentSort==='alpha') filtered.sort((a,b)=>(a.title||'').localeCompare(b.title||''));
-      else filtered.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  filtered.forEach(b=>{
+    const card=document.createElement('div'); card.className='card';
+    const catNames=(b.categories||[]).map(k=>categories[k]?categories[k].name:k).filter(Boolean);
+    card.innerHTML=`<div class="card-head">
+      <div class="titleSmall">${escapeHtml(b.title||'Untitled')}</div>
+      <div class="catTag">${escapeHtml(catNames.join(', ')||'General')}</div>
+    </div>
+    <div class="desc">${escapeHtml(b.desc||'')}</div>
+    <div class="actions">
+      <button class="copy-square" title="Copy">📋</button>
+      ${b.creditsLink? `<a class="small" target="_blank" href="${escapeHtml(b.creditsLink)}">Credits</a>`:''}
+    </div>`;
+    const copyBtn=card.querySelector('.copy-square');
+    copyBtn.addEventListener('click', async ()=>{
+      try{
+        await navigator.clipboard.writeText(b.code||b.url||'');
+        showToast('✅ Copied! See instructions above.');
+        const pRef=ref(db, `bookmarks/${b._id}/popularity`);
+        runTransaction(pRef, curr => (curr||0)+1);
+      }catch(err){ showToast('✖ Copy failed — select manually.'); }
+    });
+    grid.appendChild(card);
+  });
+}
 
-      document.getElementById('placeholder').style.display = filtered.length? 'none':'block';
-
-      filtered.forEach(b=>{
-        const card=document.createElement('div'); card.className='card';
-        const catNames=(b.categories||[]).map(k=>categories[k]?categories[k].name:k).filter(Boolean);
-        card.innerHTML=`
-          <div class="card-head">
-            <div class="titleSmall">${escapeHtml(b.title||'Untitled')}</div>
-            <div class="catTag">${escapeHtml(catNames.join(', ')||'General')}</div>
-          </div>
-          <div class="desc">${escapeHtml(b.desc||'')}</div>
-          <div class="actions">
-            <button class="copy-square" title="Copy">📋</button>
-            ${b.creditsLink? `<a class="small" target="_blank" href="${escapeHtml(b.creditsLink)}">Credits</a>`: ''}
-          </div>`;
-        const copyBtn=card.querySelector('.copy-square');
-        copyBtn.addEventListener('click', async ()=>{
-          try { await navigator.clipboard.writeText(b.code||b.url||''); showToast('✅ Copied! Visit <a href="instructions.html" class="link" target="_blank">instructions</a> to install the bookmark.'); runTransaction(ref(db,`bookmarks/${b._id}/popularity`),curr=> (curr||0)+1); }
-          catch{ showToast('✖ Copy failed — select and copy manually.'); }
-        });
-        grid.appendChild(card);
-      });
-    }
-
-    function showToast(html){ toastText.innerHTML=html; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2400); }
-    function escapeHtml(s){ return s? String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'):''; }
-  </script>
+function showToast(html){ toastText.innerHTML=html; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2400); }
+function escapeHtml(s){ return s? String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;') : ''; }
+</script>
 </body>
 </html>
