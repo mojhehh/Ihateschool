@@ -6,8 +6,8 @@
 <title>Veltra</title>
 <style>
 :root{
-  --bg:#000; --text:#fff; --muted:rgba(255,255,255,0.65); 
-  --border:rgba(255,255,255,0.12); --glow:rgba(255,255,255,0.12); 
+  --bg:#000; --text:#fff; --muted:rgba(255,255,255,0.65);
+  --border:rgba(255,255,255,0.12); --glow:rgba(255,255,255,0.12);
   --card-bg:rgba(255,255,255,0.02);
 }
 html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--text);font-family:Inter,sans-serif;}
@@ -47,16 +47,121 @@ a{color:var(--text);text-decoration:underline;}
 #instructionsOverlay .content{max-width:800px;text-align:left;font-size:18px;}
 #instructionsOverlay .backBtn{margin-top:20px;padding:10px 16px;font-size:16px;border:1px solid var(--border);background:transparent;color:#fff;border-radius:8px;cursor:pointer;}
 .placeholder{text-align:center;padding:40px;color:var(--muted);grid-column:1/-1;border-radius:12px;border:1px solid rgba(255,255,255,0.02);}
+
+/* TOS overlay */
+.tos-overlay {
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.98);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: 20px;
+  overflow-y: auto;
+}
+.tos-content {
+  max-width: 900px;
+  width: calc(100% - 48px);
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 26px;
+  border-radius: 12px;
+  box-shadow: 0 12px 36px rgba(255,255,255,0.12);
+  font-size:16px;
+  line-height:1.5;
+  transition: box-shadow 0.3s ease-in-out;
+}
+.tos-content:hover { box-shadow: 0 16px 48px rgba(255,255,255,0.18); }
+.tos-header { text-align:center; margin-bottom:12px; }
+.tos-header h2 { margin:0; font-size:20px; text-shadow: 0 0 8px rgba(255,255,255,0.12); }
+.tos-content h3 { margin-top:18px; margin-bottom:8px; color:#fff; text-shadow: 0 0 6px rgba(255,255,255,0.1); }
+.tos-content ol { padding-left: 20px; }
+.tos-accept {
+  display:block;
+  margin:18px auto 0;
+  padding:12px 22px;
+  font-size:16px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  cursor:pointer;
+  box-shadow: 0 0 8px var(--glow);
+  transition: transform .18s, box-shadow .18s;
+}
+.tos-accept:hover { transform: translateY(-2px); box-shadow: 0 0 14px var(--glow); }
+
+/* scrollbar */
+.tos-overlay::-webkit-scrollbar { width:10px; }
+.tos-overlay::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius:6px; }
+
+/* glow headings */
+.glow-header { text-shadow: 0 0 4px rgba(255,255,255,0.18); transition: text-shadow .25s ease-in-out; }
+
+/* responsive tweaks */
 @media (max-width:1024px){
   .grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
   .controls{flex-direction:column;gap:8px;align-items:stretch;}
   .search{min-width:100%;}
   .copy-square{width:60px;height:60px;font-size:24px;}
+  .tos-content { padding:18px; }
 }
 </style>
 </head>
 <body>
-<div class="container">
+
+<!-- TOS overlay (shows until accepted) -->
+<div id="tosOverlay" class="tos-overlay" role="dialog" aria-modal="true">
+  <div class="tos-content">
+    <div class="tos-header">
+      <h2 class="glow-header">Veltra — Terms of Service & Privacy Policy</h2>
+      <p><strong>Last updated: October 28, 2025</strong></p>
+    </div>
+
+    <p>Welcome to Veltra (“we,” “our,” or “us”). By accessing or using this website, you agree to the following Terms of Service and Privacy Policy. Please read carefully.</p>
+
+    <h3 class="glow-header">Terms of Service</h3>
+    <ol>
+      <li><strong>Educational Use Only</strong><br>All content on Veltra — including bookmarklets, code snippets, and other materials — is provided for educational purposes only. You should only use this content to learn, experiment safely, and explore web technologies.</li>
+
+      <li><strong>No Responsibility</strong><br>Veltra is not responsible for anything you do with the content on this site. You use all bookmarklets, code, and other materials at your own risk. We do not guarantee that any content will work correctly, safely, or legally in every situation.</li>
+
+      <li><strong>Redistribution Notice</strong><br>Veltra acts as a redistributor. Most content on this website was not created by us. We only share, organize, or link to materials that are already publicly available. If you are the owner of content and want it removed, please contact us via our support page.</li>
+
+      <li><strong>User Responsibilities</strong><br>By using Veltra, you agree to follow all applicable laws when using our content, not use content for illegal activities or to harm others, and understand that Veltra cannot prevent misuse of the content and is not liable for any consequences.</li>
+
+      <li><strong>No Warranty</strong><br>All materials on Veltra are provided “as is” without warranties of any kind, express or implied. This includes, but is not limited to, warranties of accuracy, reliability, performance, or fitness for a particular purpose.</li>
+
+      <li><strong>Intellectual Property</strong><br>Content shared on Veltra may be subject to copyright or other intellectual property rights. By sharing content, Veltra does not claim ownership. You agree to respect the original creators’ rights.</li>
+
+      <li><strong>Links to Other Websites</strong><br>Veltra may provide links to external websites. We are not responsible for the content, privacy practices, or actions of those websites. Please review the privacy policies and terms of any site you visit.</li>
+
+      <li><strong>Changes to These Terms</strong><br>We may update these Terms of Service at any time. The most recent version will always be posted on this website. By continuing to use Veltra, you accept the updated Terms.</li>
+
+      <li><strong>Support</strong><br>For questions, concerns, or content removal requests, please use the support page on the Veltra website.</li>
+    </ol>
+
+    <h3 class="glow-header">Privacy Policy</h3>
+    <ol>
+      <li><strong>What We Collect</strong><br>Veltra does not directly collect personal information like names, emails, or passwords. Some basic, anonymous data (like your browser type or general location) may be collected automatically by our hosting provider for analytics or security reasons.</li>
+
+      <li><strong>Cookies and Analytics</strong><br>If cookies or analytics tools are used, they are only for basic site functionality or understanding traffic. You can usually disable cookies in your browser settings if you prefer.</li>
+
+      <li><strong>Links to Other Websites</strong><br>Veltra may link to other websites. We are not responsible for what happens on those external sites. Always check their own privacy policies.</li>
+
+      <li><strong>Educational Purposes & Responsibility</strong><br>All content on Veltra is shared for educational purposes only. We are not responsible for anything done with the content, bookmarklets, or code found on this site. You use all materials at your own risk.</li>
+
+      <li><strong>Support</strong><br>For questions, concerns, or content removal requests, please use our support page on the Veltra website. Contact: 📧 contact@veltra.example</li>
+    </ol>
+
+    <button id="acceptTOS" class="tos-accept" aria-label="Accept terms">I Accept</button>
+  </div>
+</div>
+
+<div class="container" id="appContent" aria-hidden="true">
   <div class="header">
     <div class="logo">V</div>
     <div>
@@ -73,6 +178,7 @@ a{color:var(--text);text-decoration:underline;}
       <button id="instructionsBtn" class="btn">Instructions</button>
     </div>
   </div>
+
   <div class="top-controls">
     <div class="filter-row">
       <div class="small">Filter categories:</div>
@@ -83,15 +189,16 @@ a{color:var(--text);text-decoration:underline;}
       <button id="clearCats" class="btn">Clear</button>
     </div>
   </div>
+
   <div id="grid" class="grid"></div>
   <div id="placeholder" class="placeholder">No bookmarks match. Try another filter.</div>
 </div>
 
-<button id="lockBtn">
+<button id="lockBtn" title="Admin">
   <img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/4aca40ab959224fb756c3d04fe34f266d635f477/lock-icon-clipart-free-png%20(1).webp" alt="Admin Lock">
 </button>
 
-<div id="toast" class="toast"><span id="toastText"></span></div>
+<div id="toast" class="toast" role="status" aria-live="polite"><span id="toastText"></span></div>
 
 <!-- Instructions overlay -->
 <div id="instructionsOverlay">
@@ -108,9 +215,11 @@ a{color:var(--text);text-decoration:underline;}
 </div>
 
 <script type="module">
+/* Firebase import - keep firebase-config.js next to this file */
 import { db } from './firebase-config.js';
 import { ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 
+/* Elements */
 const grid = document.getElementById('grid');
 const toast = document.getElementById('toast');
 const toastText = document.getElementById('toastText');
@@ -124,27 +233,66 @@ const lockBtn = document.getElementById('lockBtn');
 const instructionsOverlay = document.getElementById('instructionsOverlay');
 const closeInstructions = document.getElementById('closeInstructions');
 
+/* TOS stuff */
+const tosOverlay = document.getElementById('tosOverlay');
+const acceptTOS = document.getElementById('acceptTOS');
+const appContent = document.getElementById('appContent');
+
+/* Helper to disable page interaction while TOS is open */
+function showTOS(show){
+  if(show){
+    tosOverlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    appContent.setAttribute('aria-hidden','true');
+  } else {
+    tosOverlay.style.display = 'none';
+    document.body.style.overflow = '';
+    appContent.setAttribute('aria-hidden','false');
+  }
+}
+
+/* LocalStorage check for TOS acceptance */
+const accepted = localStorage.getItem('veltraTOSAccepted');
+if(accepted === 'true'){
+  showTOS(false);
+} else {
+  showTOS(true);
+}
+
+/* Accept TOS */
+acceptTOS.addEventListener('click', () => {
+  localStorage.setItem('veltraTOSAccepted', 'true');
+  showTOS(false);
+});
+
+/* Instructions overlay */
 lockBtn.addEventListener('click', ()=> location.href='admin.html');
 instructionsBtn.addEventListener('click', ()=> instructionsOverlay.style.display='flex');
 closeInstructions.addEventListener('click', ()=> instructionsOverlay.style.display='none');
 
+/* Main data + UI state */
 let bookmarks = {}, categories = {}, selectedCats = new Set(), currentSort = sortSelect.value, lastSearchTerm='';
 
-onValue(ref(db,'categories'), snap=>{categories = snap.val()||{}; renderCategoryChips();});
-onValue(ref(db,'bookmarks'), snap=>{bookmarks = snap.val()||{}; renderGrid();});
+/* Firebase listeners */
+onValue(ref(db,'categories'), snap => { categories = snap.val() || {}; renderCategoryChips(); });
+onValue(ref(db,'bookmarks'), snap => { bookmarks = snap.val() || {}; renderGrid(); });
 
+/* Category chips */
 function renderCategoryChips(){
-  catChips.innerHTML='';
-  const keys=Object.keys(categories).sort();
-  if(keys.length===0){catChips.innerHTML='<div class="small">No categories yet</div>';return;}
-  keys.forEach(k=>{
-    const name=categories[k].name||k;
-    const btn=document.createElement('button');
-    btn.className='cat-chip';
-    btn.textContent=name;
-    btn.dataset.key=k;
-    btn.addEventListener('click',()=>{
-      selectedCats.has(k)?selectedCats.delete(k):selectedCats.add(k);
+  catChips.innerHTML = '';
+  const keys = Object.keys(categories || {}).sort();
+  if(keys.length === 0){
+    catChips.innerHTML = '<div class="small">No categories yet</div>';
+    return;
+  }
+  keys.forEach(k => {
+    const name = categories[k]?.name || k;
+    const btn = document.createElement('button');
+    btn.className = 'cat-chip';
+    btn.textContent = name;
+    btn.dataset.key = k;
+    btn.addEventListener('click', () => {
+      selectedCats.has(k) ? selectedCats.delete(k) : selectedCats.add(k);
       updateSelectedUI();
       renderGrid();
     });
@@ -154,42 +302,52 @@ function renderCategoryChips(){
 }
 
 function updateSelectedUI(){
-  Array.from(catChips.querySelectorAll('.cat-chip')).forEach(chip=>{
-    chip.classList.toggle('selected',selectedCats.has(chip.dataset.key));
+  Array.from(catChips.querySelectorAll('.cat-chip')).forEach(chip => {
+    chip.classList.toggle('selected', selectedCats.has(chip.dataset.key));
   });
-  activeCount.textContent=selectedCats.size>0?selectedCats.size+' selected':'All';
+  activeCount.textContent = selectedCats.size > 0 ? `${selectedCats.size} selected` : 'All';
 }
 
-clearCats.addEventListener('click',()=>{selectedCats.clear();updateSelectedUI();renderGrid();});
-searchInput.addEventListener('keydown',e=>{if(e.key==='Enter'){lastSearchTerm=searchInput.value.trim().toLowerCase();renderGrid();}});
-sortSelect.addEventListener('change',()=>{currentSort=sortSelect.value;renderGrid();});
+/* Controls */
+clearCats.addEventListener('click', ()=>{ selectedCats.clear(); updateSelectedUI(); renderGrid(); });
+searchInput.addEventListener('keydown', e => { if(e.key === 'Enter'){ lastSearchTerm = searchInput.value.trim().toLowerCase(); renderGrid(); }});
+sortSelect.addEventListener('change', ()=>{ currentSort = sortSelect.value; renderGrid(); });
 
+/* Render grid */
 function renderGrid(){
-  grid.innerHTML='';
-  const arr=Object.entries(bookmarks).map(([id,b])=>{
-    const item=Object.assign({},b);item._id=id;
-    if(!item.categories){if(item.category)item.categories=Array.isArray(item.category)?item.category:[item.category];else item.categories=[];}
+  grid.innerHTML = '';
+  const arr = Object.entries(bookmarks || {}).map(([id,b]) => {
+    const item = Object.assign({}, b);
+    item._id = id;
+    if(!item.categories){
+      if(item.category) item.categories = Array.isArray(item.category) ? item.category : [item.category];
+      else item.categories = [];
+    }
     return item;
   });
-  let filtered=arr.filter(b=>{
-    if(selectedCats.size>0){
-      const bkCats=(b.categories||[]).map(String);
-      if(!Array.from(selectedCats).some(s=>bkCats.includes(s))) return false;
+
+  let filtered = arr.filter(b => {
+    if(selectedCats.size > 0){
+      const bkCats = (b.categories || []).map(String);
+      if(!Array.from(selectedCats).some(s => bkCats.includes(s))) return false;
     }
     if(lastSearchTerm){
-      const text=((b.title||'')+' '+(b.desc||'')+' '+(b.categories||[]).join(' ')).toLowerCase();
+      const text = ((b.title||'') + ' ' + (b.desc||'') + ' ' + (b.categories||[]).join(' ')).toLowerCase();
       if(!text.includes(lastSearchTerm)) return false;
     }
     return true;
   });
-  if(currentSort==='popular') filtered.sort((a,b)=> (b.popularity||0)-(a.popularity||0));
-  else if(currentSort==='alpha') filtered.sort((a,b)=> (a.title||'').localeCompare(b.title||''));
-  else filtered.sort((a,b)=> (b.createdAt||0)-(a.createdAt||0));
-  document.getElementById('placeholder').style.display=filtered.length===0?'block':'none';
-  filtered.forEach(b=>{
-    const card=document.createElement('div');card.className='card';
-    const catNames=(b.categories||[]).map(k=>categories[k]?categories[k].name:k).filter(Boolean);
-    card.innerHTML=`
+
+  if(currentSort === 'popular') filtered.sort((a,b)=> (b.popularity||0) - (a.popularity||0));
+  else if(currentSort === 'alpha') filtered.sort((a,b)=> (a.title||'').localeCompare(b.title||''));
+  else filtered.sort((a,b)=> (b.createdAt||0) - (a.createdAt||0));
+
+  document.getElementById('placeholder').style.display = filtered.length === 0 ? 'block' : 'none';
+
+  filtered.forEach(b => {
+    const card = document.createElement('div'); card.className = 'card';
+    const catNames = (b.categories || []).map(k => categories[k] ? categories[k].name : k).filter(Boolean);
+    card.innerHTML = `
       <div class="card-head">
         <div class="titleSmall">${escapeHtml(b.title||'Untitled')}</div>
         <div class="catTag">${escapeHtml(catNames.join(', ')||'General')}</div>
@@ -197,21 +355,57 @@ function renderGrid(){
       <div class="desc">${escapeHtml(b.desc||'')}</div>
       <div class="actions">
         <button class="copy-square" title="Copy">📋</button>
-        ${b.creditsLink?`<a class="small" target="_blank" href="${escapeHtml(b.creditsLink)}">Credits</a>`:''}
+        ${b.creditsLink ? `<a class="small" target="_blank" href="${escapeHtml(b.creditsLink)}">Credits</a>` : ''}
       </div>`;
-    card.querySelector('.copy-square').addEventListener('click',async()=>{
+    const copyBtn = card.querySelector('.copy-square');
+    copyBtn.addEventListener('click', async () => {
       try{
-        await navigator.clipboard.writeText(b.code||b.url||'');
+        await navigator.clipboard.writeText(b.code || b.url || '');
         showToast('✅ Copied! Visit <a href="#" class="link">instructions</a> to install.');
-        runTransaction(ref(db,`bookmarks/${b._id}/popularity`),curr=>(curr||0)+1);
-      }catch(err){showToast('✖ Copy failed — select manually.');}
+        runTransaction(ref(db, `bookmarks/${b._id}/popularity`), curr => (curr||0)+1);
+      }catch(err){
+        showToast('✖ Copy failed — select manually.');
+      }
     });
     grid.appendChild(card);
   });
 }
 
-function showToast(html){toastText.innerHTML=html;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2400);}
-function escapeHtml(s){if(!s)return'';return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');}
+/* Toast */
+function showToast(html){
+  toastText.innerHTML = html;
+  toast.classList.add('show');
+  setTimeout(()=> toast.classList.remove('show'), 2400);
+}
+
+/* Utilities */
+function escapeHtml(s){ if(!s) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+/* Glow-on-scroll for TOS headings (subtle) */
+const glowHeaders = document.querySelectorAll('.glow-header');
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY || window.pageYOffset;
+  glowHeaders.forEach(h => {
+    const intensity = Math.min(scrollY / 100, 0.45);
+    h.style.textShadow = `0 0 ${4 + 20*intensity}px rgba(255,255,255,${0.18 + 0.12*intensity})`;
+  });
+});
+
+/* ensure accessibility: trap focus? basic - focus Accept when shown */
+function focusTOSAccept(){
+  if(tosOverlay.style.display === 'flex'){
+    acceptTOS.focus();
+  }
+}
+focusTOSAccept();
+
+/* Re-check TOS overlay if user clears localStorage in same session */
+window.addEventListener('storage', (e) => {
+  if(e.key === 'veltraTOSAccepted'){
+    const val = localStorage.getItem('veltraTOSAccepted');
+    showTOS(val !== 'true');
+  }
+});
 </script>
 </body>
 </html>
