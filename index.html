@@ -20,6 +20,10 @@
       z-index: 999;
       opacity: 0;
       pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .toast.show {
+      opacity: 1;
     }
     .toast .link {
       color: #ffffff;
@@ -31,7 +35,7 @@
       text-shadow: 0 0 8px rgba(255,255,255,0.3);
     }
 
-    /* Bigger copy button styling */
+    /* Copy button styling */
     .copy-square {
       width: 50px;
       height: 50px;
@@ -51,6 +55,29 @@
       transform: translateY(-2px);
       box-shadow: 0 0 10px var(--glow);
     }
+
+    /* Lock button styling */
+    #adminLock {
+      position: fixed;
+      top: 16px;
+      right: -60px; /* start off screen */
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      z-index: 1000;
+      opacity: 0.3;
+      transition: right 0.3s ease, opacity 0.3s ease;
+    }
+    #adminLock img {
+      width: 32px;
+      height: 32px;
+    }
+    /* Slide in and become fully visible on header hover */
+    .header:hover ~ #adminLock {
+      right: 16px;
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
@@ -61,7 +88,6 @@
         <div class="title">Veltra</div>
         <div class="tag">Bookmarks & bookmarklets — clean & quick</div>
       </div>
-
       <div class="controls">
         <input id="search" class="search" placeholder="Search... (press Enter to apply)">
         <select id="sortSelect" class="select" title="Sort">
@@ -88,12 +114,11 @@
     <div id="placeholder" class="placeholder" style="display:none;">No bookmarks match. Try another filter.</div>
   </div>
 
-<button id="adminLock" style="background:none; border:none; cursor:pointer; padding:0;">
-  <img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/4aca40ab959224fb756c3d04fe34f266d635f477/lock-icon-clipart-free-png%20(1).webp" 
-       alt="Admin Lock" 
-       style="width:24px; height:24px;">
-</button>
-
+  <!-- Lock button -->
+  <button id="lockBtn">
+    <img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/4aca40ab959224fb756c3d04fe34f266d635f477/lock-icon-clipart-free-png%20(1).webp" 
+         alt="Admin Lock">
+  </button>
 
   <div id="toast" class="toast"><span id="toastText"></span></div>
 
@@ -170,7 +195,7 @@
       activeCount.textContent = selectedCats.size > 0 ? selectedCats.size + ' selected' : 'All';
     }
 
-    clearCats.addEventListener('click', ()=>{
+    clearCats.addEventListener('click', ()=> {
       selectedCats.clear();
       updateSelectedUI();
       renderGrid();
@@ -244,7 +269,7 @@
           </div>
         `;
         const copyBtn = card.querySelector('.copy-square');
-        copyBtn.addEventListener('click', async ()=>{
+        copyBtn.addEventListener('click', async ()=> {
           try {
             await navigator.clipboard.writeText(b.code || b.url || '');
             showToast('✅ Copied! Visit <a href="instructions.html" class="link" target="_blank">instructions</a> to install the bookmark.');
@@ -260,11 +285,9 @@
 
     function showToast(html){
       toastText.innerHTML = html;
-      toast.classList.remove('hide');
       toast.classList.add('show');
       setTimeout(()=> {
         toast.classList.remove('show');
-        toast.classList.add('hide');
       }, 2400);
     }
 
@@ -278,4 +301,3 @@
   </script>
 </body>
 </html>
-
