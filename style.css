@@ -1,108 +1,53 @@
-/* style.css - Veltra: full black & white theme with subtle white glow */
-
-:root{
-  --bg: #000000;
-  --text: #ffffff;
-  --muted: rgba(255,255,255,0.65);
-  --border: rgba(255,255,255,0.12);
-  --glow: rgba(255,255,255,0.12);
-  --card-bg: rgba(255,255,255,0.02);
+/* admin lock - always visible */
+#lockBtn {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  padding: 6px;
+  border:1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  color: var(--text);
+  z-index: 1000;
+  opacity: 0.8;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+#lockBtn img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+#lockBtn:hover {
+  transform: scale(1.2);
+  opacity: 1;
 }
 
-/* Global resets */
-* { box-sizing: border-box; }
-html,body { height:100%; margin:0; background:var(--bg); color:var(--text); font-family: Inter, "Segoe UI", Roboto, system-ui, -apple-system, Arial; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
-a { color:var(--text) !important; text-decoration: underline; }
-a:visited, a:hover, a:active { color:var(--text) !important; }
-
-/* main layout */
-.container{ max-width:1100px; margin:18px auto; padding:14px; }
-.header{ display:flex; align-items:center; gap:12px; padding:8px 0; }
-/* logo image for all screens */
-.logo {
-  width:48px;
-  height:48px;
-  border-radius:8px;
-  display:flex;
+/* copy buttons slightly bigger for iPad */
+.copy-square {
+  width: 44px;
+  height: 44px;
+  font-size: 20px;
+  border-radius: 8px;
+  border:1px solid var(--border);
+  display:inline-flex;
   align-items:center;
   justify-content:center;
-  border:1px solid var(--border);
-  background: #070707 url('black-and-white-geometric-logos-1 (1).png') center/contain no-repeat;
-  font-weight:700;
-  font-size:20px;
+  cursor:pointer;
+  background:transparent;
   color:var(--text);
-  box-shadow:0 6px 18px var(--glow);
-  text-indent: -9999px; /* hide text fallback */
+  font-weight:700;
 }
-.title{ font-size:20px; font-weight:600; }
-.tag{ color:var(--muted); font-size:13px; margin-top:2px; }
+.copy-square:hover {
+  box-shadow:0 0 10px var(--glow);
+  transform: translateY(-2px);
+}
 
-/* controls */
-.controls{ margin-left:auto; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-.search{ background:transparent; border:1px solid var(--border); padding:8px 12px; border-radius:8px; color:var(--text); min-width:220px; }
-.search::placeholder{ color:var(--muted); }
-.select, .btn { background:transparent; border:1px solid var(--border); color:var(--text); padding:8px 10px; border-radius:8px; cursor:pointer; }
-.select:focus, .btn:focus, .search:focus { outline:none; box-shadow:0 0 8px var(--glow); }
-
-/* top controls */
-.top-controls{ display:flex; justify-content:space-between; gap:12px; align-items:center; margin-top:10px; flex-wrap:wrap; }
-.filter-row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-.small{ font-size:13px; color:var(--muted); }
-
-/* category chips */
-.cat-chips{ display:flex; gap:8px; flex-wrap:wrap; }
-.cat-chip{ padding:6px 10px; border-radius:999px; border:1px solid var(--border); cursor:pointer; background:transparent; color:var(--text); font-size:13px; }
-.cat-chip.selected{ box-shadow:0 0 8px var(--glow); transform:translateY(-2px); }
-
-/* grid */
-.grid{ display:grid; grid-template-columns: repeat(auto-fill,minmax(240px,1fr)); gap:14px; margin-top:14px; }
-
-/* card */
-.card{ border:1px solid var(--border); padding:12px; border-radius:10px; background:var(--card-bg); transition: transform .18s ease, box-shadow .18s ease; transform-origin:center; }
-.card:hover{ transform: translateY(-6px) scale(1.01); box-shadow:0 10px 30px var(--glow); }
-.card-head{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
-.titleSmall{ font-weight:600; }
-.catTag{ font-size:12px; padding:6px; border-radius:8px; border:1px solid var(--border); color:var(--text); background:transparent; }
-.desc{ color:var(--muted); font-size:13px; margin:8px 0; min-height:38px; }
-
-/* actions */
-.actions{ display:flex; gap:8px; align-items:center; }
-.copy-square{ width:36px; height:36px; border-radius:6px; border:1px solid var(--border); display:inline-flex; align-items:center; justify-content:center; cursor:pointer; background:transparent; color:var(--text); font-weight:700; }
-.copy-square:hover{ box-shadow:0 0 8px var(--glow); transform: translateY(-2px); }
-
-/* toast */
-.toast{ position:fixed; left:50%; transform:translateX(-50%); top:14px; padding:10px 16px; border-radius:999px; background:var(--text); color:var(--bg); box-shadow:0 10px 30px var(--glow); z-index:999; opacity:0; pointer-events:none; }
-.toast.show{ animation: toastIn .28s forwards; }
-.toast.hide{ animation:toastOut .24s forwards; }
-.toast .link{ color:var(--text); text-decoration: underline; font-weight:700; background:transparent; }
-
-/* placeholder */
-.placeholder{ text-align:center; padding:40px; color:var(--muted); grid-column:1/-1; border-radius:12px; border:1px solid rgba(255,255,255,0.02); }
-
-/* admin lock */
-.lock-btn{ position:fixed; right:12px; bottom:12px; border-radius:999px; padding:10px; border:1px solid var(--border); background:transparent; cursor:pointer; color:var(--text); z-index:900; }
-.lock-btn:hover{ box-shadow:0 8px 30px var(--glow); }
-
-/* admin panels */
-.panel{ max-width:980px; margin:18px auto; padding:12px; border:1px solid var(--border); border-radius:10px; background:var(--card-bg); }
-.form-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; align-items:center; }
-.input, textarea{ background:transparent; border:1px solid var(--border); padding:8px; border-radius:8px; color:var(--text); min-width:180px; }
-textarea{ min-height:80px; resize:vertical; }
-
-/* small helpers */
-.note{ color:var(--muted); font-size:13px; margin-top:6px; display:block; }
-
-/* subtle pop-in */
-@keyframes popIn { from { opacity:0; transform: translateY(6px) scale(.995);} to { opacity:1; transform:none; } }
-.card { animation: popIn .16s ease; }
-
-/* toast animations */
-@keyframes toastIn { from { opacity:0; transform:translate(-50%,-8px) scale(.98);} to { opacity:1; transform:translate(-50%,0) scale(1);} }
-@keyframes toastOut { from { opacity:1; } to { opacity:0; transform:translate(-50%,-6px) scale(.995); } }
-
-/* responsive */
-@media (max-width:640px){
-  .controls{ flex-direction:column; align-items:stretch; width:100%; }
+/* responsive tweaks for iPad */
+@media (max-width:1024px){
+  .grid { grid-template-columns: repeat(auto-fill,minmax(200px,1fr)); gap:12px; }
+  .controls { flex-direction:column; gap:8px; align-items:stretch; }
   .search{ min-width:100%; }
-  .grid{ grid-template-columns: repeat(auto-fill,minmax(200px,1fr)); }
 }
