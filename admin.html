@@ -60,6 +60,9 @@
     #adminList .item .meta .title { font-weight:600; margin-bottom:6px; }
     #adminList .item .actions { display:flex; flex-direction:column; gap:8px; min-width:120px; }
 
+    /* make the multi-select more usable */
+    select[multiple] { min-height:110px; padding:8px; }
+
     /* responsive - stack */
     @media (max-width:820px){
       .row { flex-direction:column; align-items:stretch; }
@@ -71,6 +74,7 @@
       .input { padding:14px; font-size:16px; }
       .btn { padding:12px; font-size:16px; border-radius:10px; }
       .logo-img { width:48px; height:48px; }
+      select[multiple] { min-height:160px; }
     }
   </style>
 </head>
@@ -118,7 +122,9 @@
               <input id="bTitle" class="input" placeholder="Title (shown to users)">
               <input id="bUrl" class="input" placeholder="Direct URL (optional)">
               <input id="bCode" class="input" placeholder="One-line code / bookmarklet (optional)">
-              <input id="bCats" class="input" placeholder="Categories (comma-separated keys)">
+              <!-- Replaced free-text categories with a live multi-select dropdown -->
+              <label class="small" for="bCats">Categories (select one or more)</label>
+              <select id="bCats" class="input" multiple aria-label="Categories"></select>
               <input id="bCredits" class="input" placeholder="Credits link (optional)">
               <label class="small"><input id="bFeatured" type="checkbox"> Featured</label>
               <div style="display:flex; gap:8px; margin-top:8px;">
@@ -176,7 +182,7 @@
   const bTitle = document.getElementById('bTitle');
   const bUrl = document.getElementById('bUrl');
   const bCode = document.getElementById('bCode');
-  const bCats = document.getElementById('bCats');
+  const bCats = document.getElementById('bCats'); // <select multiple>
   const bCredits = document.getElementById('bCredits');
   const bFeatured = document.getElementById('bFeatured');
   const saveBookmark = document.getElementById('saveBookmark');
@@ -220,6 +226,8 @@
       // success: UI will update via onAuthStateChanged
     } catch(err){
       loginMsg.textContent = 'Login failed: ' + (err?.message || err);
+    } finally {
+      // re-enable (onAuthStateChanged will hide login panel if successful)
       loginBtn.disabled = false;
     }
   });
@@ -233,7 +241,7 @@
         if(snap.exists()){
           loginPanel.style.display = 'none';
           adminUI.style.display = 'block';
-          // start listening to data
+          // start listening to data (onValue below)
         } else {
           await signOut(auth).catch(()=>{});
           loginPanel.style.display = 'block';
@@ -263,11 +271,41 @@
     bookmarksCache = snap.val() || {};
     renderAdminList();
   });
+
   const cRef = ref(db, 'categories');
   onValue(cRef, snap => {
     categoriesCache = snap.val() || {};
+    populateCategoryDropdown();
     renderAdminList();
   });
+
+  /* Populate the categories <select multiple> */
+  function populateCategoryDropdown(){
+    bCats.innerHTML = '';
+    const keys = Object.keys(categoriesCache || {}).sort();
+    if(keys.length === 0){
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.disabled = true;
+      opt.textContent = 'No categories yet — add one below';
+      bCats.appendChild(opt);
+      return;
+    }
+    for(const k of keys){
+      const data = categoriesCache[k] || {};
+      const option = document.createElement('option');
+      option.value = k;
+      option.textContent = data.name || k;
+      bCats.appendChild(option);
+    }
+    // If we're editing something, restore selected values
+    if(editingId && bookmarksCache[editingId]){
+      const selected = new Set((bookmarksCache[editingId].categories || []).map(String));
+      Array.from(bCats.options).forEach(opt => {
+        opt.selected = selected.has(opt.value);
+      });
+    }
+  }
 
   /* Render admin list */
   function renderAdminList(){
@@ -316,9 +354,16 @@
     bTitle.value = b.title || '';
     bUrl.value = b.url || '';
     bCode.value = b.code || '';
-    bCats.value = (b.categories || []).join(',');
     bCredits.value = b.creditsLink || '';
     bFeatured.checked = !!b.featured;
+
+    // Set selected categories in the dropdown (once options are present)
+    // If categories haven't loaded yet, populateCategoryDropdown will set selection.
+    const selectedSet = new Set((b.categories || []).map(String));
+    Array.from(bCats.options).forEach(opt => {
+      opt.selected = selectedSet.has(opt.value);
+    });
+
     // scroll into view
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -329,7 +374,9 @@
     const title = (bTitle.value || '').trim();
     const url = (bUrl.value || '').trim();
     const code = (bCode.value || '').trim();
-    const categoriesArr = (bCats.value || '').split(',').map(s=>s.trim()).filter(Boolean);
+
+    // read selected categories from the multi-select
+    const categoriesArr = Array.from(bCats.selectedOptions).map(opt => opt.value).filter(Boolean);
     const credits = (bCredits.value || '').trim();
     const featured = !!bFeatured.checked;
 
@@ -365,8 +412,11 @@
         await set(newRef, payload);
       }
       // clear
-      bTitle.value = bUrl.value = bCode.value = bCats.value = bCredits.value = '';
+      bTitle.value = bUrl.value = bCode.value = '';
+      bCredits.value = '';
       bFeatured.checked = false;
+      // clear selection in the dropdown
+      Array.from(bCats.options).forEach(opt => opt.selected = false);
     } catch(e){
       alert('Save failed');
       console.error(e);
@@ -378,8 +428,9 @@
   /* clear form */
   clearForm.addEventListener('click', ()=> {
     editingId = null;
-    bTitle.value = bUrl.value = bCode.value = bCats.value = bCredits.value = '';
+    bTitle.value = bUrl.value = bCode.value = bCredits.value = '';
     bFeatured.checked = false;
+    Array.from(bCats.options).forEach(opt => opt.selected = false);
   });
 
   /* add category */
@@ -393,6 +444,7 @@
     try{
       await set(ref(db, `categories/${key}`), { name, createdAt: Date.now() });
       catKey.value = ''; catName.value = '';
+      // onValue(cRef) will refresh the dropdown automatically
       alert('Category added');
     } catch(e){
       alert('Add category failed');
