@@ -122,6 +122,15 @@ a{color:var(--text);text-decoration:underline;}
   </div>
 </div>
 
+<!-- TOS flying logo -->
+<div id="tosLogo" style="
+  position:fixed; top:100px; left:50%; transform:translateX(-50%);
+  width:48px; height:48px; background:#070707; border-radius:8px;
+  z-index:3500; display:flex; align-items:center; justify-content:center;
+  text-indent:-9999px;">
+  V
+</div>
+
 <div class="container" id="appContent" aria-hidden="true">
   <div class="header">
     <div class="logo">V</div>
@@ -195,6 +204,11 @@ const closeInstructions = document.getElementById('closeInstructions');
 const tosOverlay = document.getElementById('tosOverlay');
 const acceptTOS = document.getElementById('acceptTOS');
 const appContent = document.getElementById('appContent');
+const tosLogo = document.getElementById('tosLogo');
+const headerLogo = document.querySelector('.header .logo');
+
+// Hide header logo initially
+headerLogo.style.visibility = 'hidden';
 
 function showTOS(show){
   if(show){
@@ -214,6 +228,26 @@ const accepted = localStorage.getItem('veltraTOSAccepted');
 showTOS(accepted !== 'true');
 
 acceptTOS.addEventListener('click', () => {
+  // Animate logo fly to header
+  const headerRect = headerLogo.getBoundingClientRect();
+  const tosRect = tosLogo.getBoundingClientRect();
+  const deltaX = headerRect.left - tosRect.left;
+  const deltaY = headerRect.top - tosRect.top;
+  const scaleUp = 1.3;
+
+  tosLogo.style.transition = 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+  tosLogo.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${scaleUp})`;
+
+  setTimeout(() => {
+    tosLogo.style.transition = 'transform 0.3s ease-out';
+    tosLogo.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(1)`;
+  }, 500);
+
+  tosLogo.addEventListener('transitionend', () => {
+    tosLogo.style.display = 'none';
+    headerLogo.style.visibility = 'visible';
+  }, { once: true });
+
   localStorage.setItem('veltraTOSAccepted','true');
   showTOS(false);
 });
@@ -239,65 +273,56 @@ function renderCategoryChips(){
     btn.dataset.key=k;
     btn.addEventListener('click',()=>{
       selectedCats.has(k)?selectedCats.delete(k):selectedCats.add(k);
-      updateSelectedUI();
+      btn.classList.toggle('selected');
       renderGrid();
     });
     catChips.appendChild(btn);
   });
-  updateSelectedUI();
 }
-
-function updateSelectedUI(){
-  Array.from(catChips.querySelectorAll('.cat-chip')).forEach(chip=>chip.classList.toggle('selected',selectedCats.has(chip.dataset.key)));
-  activeCount.textContent = selectedCats.size>0?`${selectedCats.size} selected`:'All';
-}
-
-clearCats.addEventListener('click',()=>{ selectedCats.clear(); updateSelectedUI(); renderGrid(); });
-searchInput.addEventListener('keydown',e=>{if(e.key==='Enter'){lastSearchTerm=searchInput.value.trim().toLowerCase(); renderGrid();}});
-sortSelect.addEventListener('change',()=>{ currentSort=sortSelect.value; renderGrid(); });
 
 function renderGrid(){
   grid.innerHTML='';
-  const arr=Object.entries(bookmarks||{}).filter(([k,v])=>{
-    if(selectedCats.size>0 && (!v.categories||!v.categories.some(c=>selectedCats.has(c)))) return false;
-    if(lastSearchTerm && !(v.title?.toLowerCase().includes(lastSearchTerm)||v.desc?.toLowerCase().includes(lastSearchTerm))) return false;
-    return true;
+  let filtered = Object.values(bookmarks || {}).filter(b=>{
+    if(selectedCats.size>0 && !selectedCats.has(b.category)) return false;
+    const search=lastSearchTerm.toLowerCase();
+    return !search||b.title.toLowerCase().includes(search)||b.desc.toLowerCase().includes(search);
   });
-  if(arr.length===0){document.getElementById('placeholder').style.display='block'; return;} 
-  else document.getElementById('placeholder').style.display='none';
-
-  if(currentSort==='alpha') arr.sort((a,b)=> (a[1].title||'').localeCompare(b[1].title||'')); 
-  else if(currentSort==='newest') arr.sort((a,b)=> (b[1].created||0)-(a[1].created||0)); 
-  else if(currentSort==='popular') arr.sort((a,b)=> (b[1].popularity||0)-(a[1].popularity||0));
-
-  arr.forEach(([k,v])=>{
-    const card=document.createElement('div'); card.className='card';
-    card.innerHTML=`
+  // sort
+  if(currentSort==='newest') filtered.sort((a,b)=>b.timestamp-a.timestamp);
+  else if(currentSort==='popular') filtered.sort((a,b)=>b.clicks-b.clicks);
+  else if(currentSort==='alpha') filtered.sort((a,b)=>a.title.localeCompare(b.title));
+  filtered.forEach(b=>{
+    const c=document.createElement('div'); c.className='card';
+    c.innerHTML=`
       <div class="card-head">
-        <div class="titleSmall">${v.title||'Untitled'}</div>
-        <div class="catTag">${(v.categories||[]).map(c=>categories[c]?.name||c).join(', ')}</div>
+        <div class="titleSmall">${b.title}</div>
+        <div class="catTag">${categories[b.category]?.name||b.category}</div>
       </div>
-      <div class="desc">${v.desc||''}</div>
+      <div class="desc">${b.desc}</div>
       <div class="actions">
-        <div class="copy-square" title="Copy bookmarklet" data-code="${v.code||''}">
-          <img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/5578f9bfa8d48f441c994e4e20ad2b2a4afb7873/pngtree-vector-copy-icon-png-image_4162801.jpg" alt="Copy">
-        </div>
-      </div>`;
-    grid.appendChild(card);
-  });
-
-  document.querySelectorAll('.copy-square').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const code=btn.dataset.code||'';
-      navigator.clipboard.writeText(code);
-      toastText.textContent='Copied to clipboard';
-      toast.classList.add('show');
-      setTimeout(()=>toast.classList.remove('show'),1800);
+        <button class="copy-square" title="Copy bookmarklet">&#128203;</button>
+      </div>
+    `;
+    const copyBtn = c.querySelector('.copy-square');
+    copyBtn.addEventListener('click',()=>{
+      navigator.clipboard.writeText(b.code).then(()=>showToast('Copied!'));
+      runTransaction(ref(db,'bookmarks/'+b.id+'/clicks'), c => (c||0)+1);
     });
+    grid.appendChild(c);
   });
+  activeCount.textContent = filtered.length || 'None';
+  document.getElementById('placeholder').style.display = filtered.length?'none':'block';
+}
+
+searchInput.addEventListener('input',()=>{ lastSearchTerm=searchInput.value; renderGrid(); });
+sortSelect.addEventListener('change',()=>{ currentSort=sortSelect.value; renderGrid(); });
+clearCats.addEventListener('click',()=>{ selectedCats.clear(); document.querySelectorAll('.cat-chip.selected').forEach(el=>el.classList.remove('selected')); renderGrid(); });
+
+function showToast(msg){
+  toastText.textContent=msg;
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'),1800);
 }
 </script>
-
 </body>
 </html>
-
