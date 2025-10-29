@@ -1,459 +1,269 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-  <title>Veltra — Admin</title>
-
-  <!-- keep your external style if you want -->
-  <link rel="stylesheet" href="style.css">
-
-  <style>
-    /* Admin page specific overrides + responsive layout */
-    :root {
-      --bg: #000;
-      --card: #0b0b0b;
-      --muted: #cfcfcf;
-      --accent: #222;
-      --white: #fff;
-    }
-
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--white);font-family:Inter,system-ui,Arial; -webkit-font-smoothing:antialiased;}
-    .wrap { min-height:100vh; display:flex; align-items:flex-start; justify-content:center; padding:20px; box-sizing:border-box; }
-
-    .container {
-      width:100%;
-      max-width:980px;
-      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border:1px solid rgba(255,255,255,0.06);
-      border-radius:12px;
-      padding:20px;
-      box-sizing:border-box;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.6);
-    }
-
-    .top-row { display:flex; gap:12px; align-items:center; justify-content:space-between; margin-bottom:12px; }
-    .logo-img { width:56px; height:56px; border-radius:8px; object-fit:contain; border:1px solid rgba(255,255,255,0.06); background:#070707; }
-
-    h1 { margin:0; font-size:20px; }
-    p.note { margin:6px 0 0; color:var(--muted); font-size:13px; }
-
-    /* panels */
-    .panel { background:var(--card); border-radius:10px; padding:14px; border:1px solid rgba(255,255,255,0.04); margin-bottom:12px; }
-    .panel h2 { margin:0 0 8px; font-size:18px; }
-
-    /* inputs / buttons */
-    .input { width:100%; padding:10px 12px; background:transparent; border:1px solid rgba(255,255,255,0.06); color:var(--white); border-radius:8px; box-sizing:border-box; margin-top:8px; }
-    .row { display:flex; gap:8px; align-items:center; }
-    .col { display:flex; flex-direction:column; gap:6px; width:100%; }
-    .btn { display:inline-block; padding:10px 12px; background:transparent; border:1px solid rgba(255,255,255,0.08); color:var(--white); border-radius:8px; cursor:pointer; font-size:15px; }
-    .btn:active { transform:translateY(1px); }
-    .btn.primary { background:#111; border-color:rgba(255,255,255,0.12); }
-    .btn.full { width:100%; }
-
-    .small { color:var(--muted); font-size:13px; }
-    hr { border:0; border-top:1px solid rgba(255,255,255,0.03); margin:12px 0; }
-
-    /* admin list */
-    #adminList .item { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; margin-bottom:8px; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.02); background:transparent; }
-    #adminList .item .meta { max-width:70%; }
-    #adminList .item .meta .title { font-weight:600; margin-bottom:6px; }
-    #adminList .item .actions { display:flex; flex-direction:column; gap:8px; min-width:120px; }
-
-    /* make the multi-select more usable */
-    select[multiple] { min-height:110px; padding:8px; }
-
-    /* responsive - stack */
-    @media (max-width:820px){
-      .row { flex-direction:column; align-items:stretch; }
-      #adminList .item .actions { flex-direction:row; min-width:unset; }
-    }
-
-    /* make controls easier to tap on phones */
-    @media (max-width:480px){
-      .input { padding:14px; font-size:16px; }
-      .btn { padding:12px; font-size:16px; border-radius:10px; }
-      .logo-img { width:48px; height:48px; }
-      select[multiple] { min-height:160px; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Veltra Admin</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 20px; max-width: 1000px; }
+  h1, h2 { margin-top: 20px; }
+  label { display: block; margin-top: 10px; }
+  input, textarea, select { width: 100%; padding: 6px; margin-top: 4px; }
+  button { padding: 6px 12px; margin-top: 8px; cursor: pointer; }
+  .hidden { display: none; }
+  .section { border: 1px solid #ddd; padding: 12px; border-radius: 6px; margin-top: 20px; }
+  .item { border: 1px solid #ccc; padding: 8px; border-radius: 6px; margin-top: 10px; }
+  .item button { margin-right: 6px; }
+  .flex { display: flex; gap: 6px; flex-wrap: wrap; }
+  .small { font-size: 0.85rem; color: #555; }
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="container">
 
-      <div class="top-row">
-        <div style="display:flex; gap:12px; align-items:center;">
-          <img class="logo-img" alt="Veltra" src="https://raw.githubusercontent.com/mojhehh/Ihateschool/9c2adba6db2e99e34e55a8bf98089f45521457d5/black-and-white-geometric-logos-1%20(1).png">
-          <div>
-            <h1>Veltra — Admin</h1>
-            <p class="note">Manage bookmarks & categories (realtime sync with Firebase).</p>
-          </div>
-        </div>
+<h1>Veltra Admin Panel</h1>
 
-        <!-- back button -->
-        <div>
-          <button id="backBtn" type="button" class="btn">← Back</button>
-        </div>
-      </div>
+<div id="loginDiv">
+  <h2>Sign in</h2>
+  <label>Email<input type="email" id="email"></label>
+  <label>Password<input type="password" id="password"></label>
+  <button id="loginBtn">Login</button>
+  <div id="loginMsg" class="small"></div>
+</div>
 
-      <!-- LOGIN PANEL -->
-      <div id="loginPanel" class="panel" aria-live="polite">
-        <h2>Admin Login</h2>
-        <div class="col">
-          <input id="email" class="input" type="email" autocomplete="username" placeholder="Admin email">
-          <input id="password" class="input" type="password" autocomplete="current-password" placeholder="Password">
-          <button id="loginBtn" type="button" class="btn primary full">Login</button>
-          <div id="loginMsg" class="small" style="min-height:18px"></div>
-          <div class="small">Click the lock on the main page to open this. Nothing admin loads until you log in.</div>
-        </div>
-      </div>
-
-      <!-- ADMIN UI (hidden until logged in) -->
-      <div id="adminUI" style="display:none;">
-        <div class="panel">
-          <h2>Admin Panel</h2>
-          <div class="small">Add / edit / delete bookmarks and categories. Changes update in realtime.</div>
-          <hr>
-
-          <h3 style="margin-top:6px">Add / Edit Bookmark</h3>
-          <div class="form-row">
-            <div class="col">
-              <input id="bTitle" class="input" placeholder="Title (shown to users)">
-              <input id="bUrl" class="input" placeholder="Direct URL (optional)">
-              <input id="bCode" class="input" placeholder="One-line code / bookmarklet (optional)">
-              <!-- Replaced free-text categories with a live multi-select dropdown -->
-              <label class="small" for="bCats">Categories (select one or more)</label>
-              <select id="bCats" class="input" multiple aria-label="Categories"></select>
-              <input id="bCredits" class="input" placeholder="Credits link (optional)">
-              <label class="small"><input id="bFeatured" type="checkbox"> Featured</label>
-              <div style="display:flex; gap:8px; margin-top:8px;">
-                <button id="saveBookmark" type="button" class="btn primary">Save</button>
-                <button id="clearForm" type="button" class="btn">Clear</button>
-              </div>
-            </div>
-          </div>
-
-          <hr>
-
-          <h3>Categories</h3>
-          <div class="form-row">
-            <div class="row">
-              <input id="catKey" class="input" placeholder="Category key (no spaces)">
-              <input id="catName" class="input" placeholder="Category display name">
-            </div>
-            <div style="margin-top:8px;">
-              <button id="addCat" type="button" class="btn primary">Add Category</button>
-              <div class="small" style="margin-top:6px">Category keys are used when adding bookmarks.</div>
-            </div>
-          </div>
-
-          <hr>
-
-          <h3>Existing Bookmarks</h3>
-          <div id="adminList" aria-live="polite"></div>
-
-          <hr>
-
-          <div style="display:flex; gap:8px;">
-            <button id="logoutBtn" type="button" class="btn">Logout</button>
-          </div>
-        </div>
-      </div>
-    </div>
+<div id="adminDiv" class="hidden">
+  <div>
+    <span class="small">Signed in as <span id="userEmail"></span> (<span id="userUid"></span>)</span>
+    <button id="logoutBtn">Logout</button>
   </div>
 
-  <!-- Firebase + Admin logic -->
-  <script type="module">
-  import { auth, db } from './firebase-config.js';
-  import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
-  import { ref, onValue, push, set, update, remove, get } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
+  <!-- Bookmarks Section -->
+  <div class="section">
+    <h2>Bookmarks</h2>
+    <form id="bookmarkForm">
+      <input type="hidden" id="bookmarkId">
+      <label>Title<input id="bmTitle" required></label>
+      <label>URL<input id="bmUrl"></label>
+      <label>Description<textarea id="bmDesc" rows="2"></textarea></label>
+      <label>Code<textarea id="bmCode" rows="2"></textarea></label>
+      <label>Credits Link<input id="bmCredits"></label>
+      <label>Featured
+        <select id="bmFeatured">
+          <option value="false">No</option>
+          <option value="true">Yes</option>
+        </select>
+      </label>
+      <button type="submit">Save Bookmark</button>
+    </form>
+    <div id="bookmarkList">Loading bookmarks…</div>
+  </div>
 
-  // ELEMENTS
-  const loginPanel = document.getElementById('loginPanel');
-  const loginMsg = document.getElementById('loginMsg');
-  const adminUI = document.getElementById('adminUI');
-  const loginBtn = document.getElementById('loginBtn');
-  const emailEl = document.getElementById('email');
-  const passEl = document.getElementById('password');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const backBtn = document.getElementById('backBtn');
+  <!-- Categories Section -->
+  <div class="section">
+    <h2>Categories</h2>
+    <form id="categoryForm">
+      <input type="hidden" id="categoryId">
+      <label>Name<input id="catName" required></label>
+      <button type="submit">Save Category</button>
+    </form>
+    <div id="categoryList">Loading categories…</div>
+  </div>
+</div>
 
-  const bTitle = document.getElementById('bTitle');
-  const bUrl = document.getElementById('bUrl');
-  const bCode = document.getElementById('bCode');
-  const bCats = document.getElementById('bCats'); // <select multiple>
-  const bCredits = document.getElementById('bCredits');
-  const bFeatured = document.getElementById('bFeatured');
-  const saveBookmark = document.getElementById('saveBookmark');
-  const clearForm = document.getElementById('clearForm');
-  const adminList = document.getElementById('adminList');
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+import { getDatabase, ref, get, set, push, update, remove } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
 
-  const catKey = document.getElementById('catKey');
-  const catName = document.getElementById('catName');
-  const addCat = document.getElementById('addCat');
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyCaNPIKQU-LVWctrZffkIJAP1-odXOdof8",
+  authDomain: "school-thingy-45207.firebaseapp.com",
+  databaseURL: "https://school-thingy-45207-default-rtdb.firebaseio.com",
+  projectId: "school-thingy-45207",
+  storageBucket: "school-thingy-45207.firebasestorage.app",
+  messagingSenderId: "1048084200731",
+  appId: "1:1048084200731:web:b0d9927aee9f4d3dbce7be",
+  measurementId: "G-7Y7KRR2EYK"
+};
 
-  let editingId = null;
-  let bookmarksCache = {};
-  let categoriesCache = {};
+// Init Firebase
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
 
-  /* Back */
-  backBtn.addEventListener('click', () => {
-    // go to index (adjust if your main page path differs)
-    window.location.href = 'index.html';
-  });
+// DOM elements
+const loginDiv = document.getElementById('loginDiv');
+const adminDiv = document.getElementById('adminDiv');
+const loginBtn = document.getElementById('loginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const loginMsg = document.getElementById('loginMsg');
+const userEmail = document.getElementById('userEmail');
+const userUid = document.getElementById('userUid');
 
-  /* Login handler */
-  loginBtn.addEventListener('click', async (ev) => {
-    ev.preventDefault();
-    loginMsg.textContent = '';
-    if(!emailEl.value.trim() || !passEl.value){
-      loginMsg.textContent = 'Enter email and password';
-      return;
-    }
-    try{
-      loginBtn.disabled = true;
-      const cred = await signInWithEmailAndPassword(auth, emailEl.value.trim(), passEl.value);
-      const uid = cred.user.uid;
-      // check admin flag in db
-      const snap = await get(ref(db, `admins/${uid}`));
-      if(!snap.exists()){
-        await signOut(auth);
-        loginMsg.textContent = 'Not an admin.';
-        loginBtn.disabled = false;
-        return;
-      }
-      // success: UI will update via onAuthStateChanged
-    } catch(err){
-      loginMsg.textContent = 'Login failed: ' + (err?.message || err);
-    } finally {
-      // re-enable (onAuthStateChanged will hide login panel if successful)
-      loginBtn.disabled = false;
-    }
-  });
+// Forms and lists
+const bookmarkForm = document.getElementById('bookmarkForm');
+const bmTitle = document.getElementById('bmTitle');
+const bmUrl = document.getElementById('bmUrl');
+const bmDesc = document.getElementById('bmDesc');
+const bmCode = document.getElementById('bmCode');
+const bmCredits = document.getElementById('bmCredits');
+const bmFeatured = document.getElementById('bmFeatured');
+const bookmarkId = document.getElementById('bookmarkId');
+const bookmarkList = document.getElementById('bookmarkList');
 
-  /* Auth state */
-  onAuthStateChanged(auth, async (user) => {
-    if(user){
-      try{
-        const uid = user.uid;
-        const snap = await get(ref(db, `admins/${uid}`));
-        if(snap.exists()){
-          loginPanel.style.display = 'none';
-          adminUI.style.display = 'block';
-          // start listening to data (onValue below)
-        } else {
-          await signOut(auth).catch(()=>{});
-          loginPanel.style.display = 'block';
-          adminUI.style.display = 'none';
-        }
-      } catch(e){
-        console.error(e);
-        loginPanel.style.display = 'block';
-        adminUI.style.display = 'none';
-      }
+const categoryForm = document.getElementById('categoryForm');
+const catName = document.getElementById('catName');
+const categoryId = document.getElementById('categoryId');
+const categoryList = document.getElementById('categoryList');
+
+// ----- Auth -----
+loginBtn.addEventListener('click', async () => {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  loginMsg.textContent = '';
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch(e) {
+    loginMsg.textContent = 'Login failed: ' + e.message;
+  }
+});
+
+logoutBtn.addEventListener('click', () => signOut(auth));
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    // Check /admins/<uid>
+    const adminRef = ref(db, 'admins/' + user.uid);
+    const snap = await get(adminRef);
+    if (snap.exists() && snap.val() === true) {
+      loginDiv.classList.add('hidden');
+      adminDiv.classList.remove('hidden');
+      userEmail.textContent = user.email;
+      userUid.textContent = user.uid;
+      loadBookmarks();
+      loadCategories();
     } else {
-      loginPanel.style.display = 'block';
-      adminUI.style.display = 'none';
+      alert('Access denied. Not an admin.');
+      signOut(auth);
     }
-  });
-
-  /* Logout */
-  logoutBtn.addEventListener('click', async () => {
-    await signOut(auth).catch(()=>{});
-    loginPanel.style.display = 'block';
-    adminUI.style.display = 'none';
-  });
-
-  /* Live watches for bookmarks & categories */
-  const bRef = ref(db, 'bookmarks');
-  onValue(bRef, snap => {
-    bookmarksCache = snap.val() || {};
-    renderAdminList();
-  });
-
-  const cRef = ref(db, 'categories');
-  onValue(cRef, snap => {
-    categoriesCache = snap.val() || {};
-    populateCategoryDropdown();
-    renderAdminList();
-  });
-
-  /* Populate the categories <select multiple> */
-  function populateCategoryDropdown(){
-    bCats.innerHTML = '';
-    const keys = Object.keys(categoriesCache || {}).sort();
-    if(keys.length === 0){
-      const opt = document.createElement('option');
-      opt.value = '';
-      opt.disabled = true;
-      opt.textContent = 'No categories yet — add one below';
-      bCats.appendChild(opt);
-      return;
-    }
-    for(const k of keys){
-      const data = categoriesCache[k] || {};
-      const option = document.createElement('option');
-      option.value = k;
-      option.textContent = data.name || k;
-      bCats.appendChild(option);
-    }
-    // If we're editing something, restore selected values
-    if(editingId && bookmarksCache[editingId]){
-      const selected = new Set((bookmarksCache[editingId].categories || []).map(String));
-      Array.from(bCats.options).forEach(opt => {
-        opt.selected = selected.has(opt.value);
-      });
-    }
+  } else {
+    loginDiv.classList.remove('hidden');
+    adminDiv.classList.add('hidden');
   }
+});
 
-  /* Render admin list */
-  function renderAdminList(){
-    adminList.innerHTML = '';
-    const entries = Object.entries(bookmarksCache || {}).sort((a,b)=> (b[1].createdAt||0) - (a[1].createdAt||0));
-    if(entries.length === 0){
-      adminList.innerHTML = '<div class="small">No bookmarks yet.</div>';
-      return;
-    }
-    for(const [id, item] of entries){
-      const cats = (item.categories || []).join(', ');
-      const div = document.createElement('div');
-      div.className = 'item panel';
-      div.innerHTML = `
-        <div class="meta">
-          <div class="title">${escapeHtml(item.title || 'Untitled')}</div>
-          <div class="small">${escapeHtml(item.desc || '')}</div>
-          <div class="small">Cats: ${escapeHtml(cats || '—')}</div>
-        </div>
-        <div class="actions">
-          <button type="button" class="btn edit" data-id="${id}">Edit</button>
-          <button type="button" class="btn" style="background:transparent;border-color:rgba(255,0,0,0.08)" data-id="${id}" data-delete>Delete</button>
-        </div>
-      `;
-      adminList.appendChild(div);
-    }
-    // attach handlers
-    adminList.querySelectorAll('[data-delete]').forEach(btn=>{
-      btn.addEventListener('click', async () => {
-        const id = btn.dataset.id;
-        if(!id) return;
-        if(!confirm('Delete this bookmark? This cannot be undone.')) return;
-        try{ await remove(ref(db, `bookmarks/${id}`)); } catch(e){ alert('Delete failed'); console.error(e); }
-      });
-    });
-    adminList.querySelectorAll('.edit').forEach(btn=>{
-      btn.addEventListener('click', ()=> startEdit(btn.dataset.id) );
-    });
-  }
+// ----- Bookmarks -----
+async function loadBookmarks() {
+  const snap = await get(ref(db, 'bookmarks'));
+  const data = snap.val() || {};
+  renderBookmarks(data);
+}
 
-  /* edit */
-  function startEdit(id){
-    const b = bookmarksCache[id];
-    if(!b) return;
-    editingId = id;
-    bTitle.value = b.title || '';
-    bUrl.value = b.url || '';
-    bCode.value = b.code || '';
-    bCredits.value = b.creditsLink || '';
-    bFeatured.checked = !!b.featured;
+function renderBookmarks(data) {
+  bookmarkList.innerHTML = '';
+  for (const id in data) {
+    const bm = data[id];
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.innerHTML = `
+      <strong>${bm.title}</strong> <span class="small">(${bm.featured ? 'Featured' : 'No'})</span>
+      <div class="small">${bm.creditsLink || ''}</div>
+      <div class="flex">
+        <button data-id="${id}" class="edit">Edit</button>
+        <button data-id="${id}" class="del">Delete</button>
+      </div>
+    `;
+    bookmarkList.appendChild(div);
 
-    // Set selected categories in the dropdown (once options are present)
-    // If categories haven't loaded yet, populateCategoryDropdown will set selection.
-    const selectedSet = new Set((b.categories || []).map(String));
-    Array.from(bCats.options).forEach(opt => {
-      opt.selected = selectedSet.has(opt.value);
+    div.querySelector('.edit').addEventListener('click', () => {
+      bookmarkId.value = id;
+      bmTitle.value = bm.title || '';
+      bmUrl.value = bm.url || '';
+      bmDesc.value = bm.desc || '';
+      bmCode.value = bm.code || '';
+      bmCredits.value = bm.creditsLink || '';
+      bmFeatured.value = bm.featured ? 'true' : 'false';
     });
 
-    // scroll into view
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    div.querySelector('.del').addEventListener('click', async () => {
+      if (!confirm('Delete this bookmark?')) return;
+      await remove(ref(db, 'bookmarks/' + id));
+      loadBookmarks();
+    });
   }
+}
 
-  /* save bookmark */
-  saveBookmark.addEventListener('click', async () => {
-    saveBookmark.disabled = true;
-    const title = (bTitle.value || '').trim();
-    const url = (bUrl.value || '').trim();
-    const code = (bCode.value || '').trim();
+bookmarkForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const payload = {
+    title: bmTitle.value,
+    url: bmUrl.value,
+    desc: bmDesc.value,
+    code: bmCode.value,
+    creditsLink: bmCredits.value,
+    featured: bmFeatured.value === 'true',
+    updatedAt: Date.now()
+  };
+  if (bookmarkId.value) {
+    await update(ref(db, 'bookmarks/' + bookmarkId.value), payload);
+  } else {
+    payload.createdAt = Date.now();
+    await push(ref(db, 'bookmarks'), payload);
+  }
+  bookmarkForm.reset();
+  bookmarkId.value = '';
+  loadBookmarks();
+});
 
-    // read selected categories from the multi-select
-    const categoriesArr = Array.from(bCats.selectedOptions).map(opt => opt.value).filter(Boolean);
-    const credits = (bCredits.value || '').trim();
-    const featured = !!bFeatured.checked;
+// ----- Categories -----
+async function loadCategories() {
+  const snap = await get(ref(db, 'categories'));
+  const data = snap.val() || {};
+  renderCategories(data);
+}
 
-    if(!title || (!url && !code)){
-      alert('Title + URL or code required');
-      saveBookmark.disabled = false;
-      return;
-    }
-    if(code && code.split(/\r\n|\r|\n/).length > 1){
-      alert('Bookmarklet/code must be one line');
-      saveBookmark.disabled = false;
-      return;
-    }
+function renderCategories(data) {
+  categoryList.innerHTML = '';
+  for (const id in data) {
+    const cat = data[id];
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.innerHTML = `
+      <strong>${cat.name}</strong>
+      <div class="flex">
+        <button data-id="${id}" class="edit">Edit</button>
+        <button data-id="${id}" class="del">Delete</button>
+      </div>
+    `;
+    categoryList.appendChild(div);
 
-    const payload = {
-      title,
-      desc: '',
-      url,
-      code,
-      categories: categoriesArr,
-      creditsLink: credits,
-      featured,
-      popularity: editingId ? (bookmarksCache[editingId]?.popularity || 0) : 0,
-      createdAt: editingId ? (bookmarksCache[editingId]?.createdAt || Date.now()) : Date.now()
-    };
+    div.querySelector('.edit').addEventListener('click', () => {
+      categoryId.value = id;
+      catName.value = cat.name;
+    });
 
-    try{
-      if(editingId){
-        await update(ref(db, `bookmarks/${editingId}`), payload);
-        editingId = null;
-      } else {
-        const newRef = push(ref(db, 'bookmarks'));
-        await set(newRef, payload);
-      }
-      // clear
-      bTitle.value = bUrl.value = bCode.value = '';
-      bCredits.value = '';
-      bFeatured.checked = false;
-      // clear selection in the dropdown
-      Array.from(bCats.options).forEach(opt => opt.selected = false);
-    } catch(e){
-      alert('Save failed');
-      console.error(e);
-    } finally {
-      saveBookmark.disabled = false;
-    }
-  });
+    div.querySelector('.del').addEventListener('click', async () => {
+      if (!confirm('Delete this category?')) return;
+      await remove(ref(db, 'categories/' + id));
+      loadCategories();
+    });
+  }
+}
 
-  /* clear form */
-  clearForm.addEventListener('click', ()=> {
-    editingId = null;
-    bTitle.value = bUrl.value = bCode.value = bCredits.value = '';
-    bFeatured.checked = false;
-    Array.from(bCats.options).forEach(opt => opt.selected = false);
-  });
-
-  /* add category */
-  addCat.addEventListener('click', async ()=> {
-    const key = (catKey.value || '').trim();
-    const name = (catName.value || '').trim();
-    if(!key || !name){
-      alert('Both key and name required');
-      return;
-    }
-    try{
-      await set(ref(db, `categories/${key}`), { name, createdAt: Date.now() });
-      catKey.value = ''; catName.value = '';
-      // onValue(cRef) will refresh the dropdown automatically
-      alert('Category added');
-    } catch(e){
-      alert('Add category failed');
-      console.error(e);
-    }
-  });
-
-  /* helper */
-  function escapeHtml(s){ if(!s) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
-  </script>
+categoryForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const payload = { name: catName.value, updatedAt: Date.now() };
+  if (categoryId.value) {
+    await update(ref(db, 'categories/' + categoryId.value), payload);
+  } else {
+    payload.createdAt = Date.now();
+    await push(ref(db, 'categories'), payload);
+  }
+  categoryForm.reset();
+  categoryId.value = '';
+  loadCategories();
+});
+</script>
 </body>
 </html>
