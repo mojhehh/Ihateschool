@@ -36,6 +36,7 @@ a{color:var(--text);text-decoration:underline;}
 .desc{color:var(--muted);font-size:13px;margin:8px 0;min-height:38px;}
 .actions{display:flex;gap:8px;align-items:center;}
 .copy-square{width:44px;height:44px;border-radius:8px;border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:transparent;color:var(--text);font-weight:700;font-size:20px;}
+.copy-square img{width:24px;height:24px;}
 .copy-square:hover{box-shadow:0 0 10px var(--glow);transform:translateY(-2px);}
 .toast{position:fixed;left:50%;transform:translateX(-50%);top:14px;padding:12px 18px;border-radius:999px;background:#000;color:#fff;box-shadow:0 10px 30px rgba(255,255,255,0.12);z-index:999;opacity:0;pointer-events:none;transition:opacity 0.3s;}
 .toast.show{opacity:1;}
@@ -43,46 +44,28 @@ a{color:var(--text);text-decoration:underline;}
 #lockBtn{position:fixed;top:16px;right:16px;width:40px;height:40px;border-radius:8px;padding:6px;border:1px solid var(--border);background:transparent;cursor:pointer;opacity:0.8;z-index:1000;transition:transform 0.2s,opacity 0.2s;}
 #lockBtn img{width:100%;height:100%;display:block;}
 #lockBtn:hover{transform:scale(1.2);opacity:1;}
-#instructionsOverlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:2000;padding:20px;overflow:auto;}
-#instructionsOverlay .content{max-width:800px;text-align:left;font-size:18px;}
+#instructionsOverlay{
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,0.95); color:#fff;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  z-index:2000; padding:40px; overflow:auto;
+  opacity:0; pointer-events:none; transition:opacity 0.3s ease;
+}
+#instructionsOverlay.show { opacity:1; pointer-events:auto; }
+#instructionsOverlay .content{max-width:800px; text-align:left; font-size:18px; }
 #instructionsOverlay .backBtn{margin-top:20px;padding:10px 16px;font-size:16px;border:1px solid var(--border);background:transparent;color:#fff;border-radius:8px;cursor:pointer;}
 .placeholder{text-align:center;padding:40px;color:var(--muted);grid-column:1/-1;border-radius:12px;border:1px solid rgba(255,255,255,0.02);}
 
 /* TOS modal */
-.tos-overlay {
-  position: fixed;
-  top:0; left:0;
-  width:100%; height:100%;
-  background: rgba(0,0,0,0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 3000;
-  opacity: 1;
-  transition: opacity 0.4s ease;
-  pointer-events: auto;
-}
+.tos-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 3000; opacity: 1; transition: opacity 0.4s ease; pointer-events: auto; }
 .tos-overlay.hidden { opacity:0; pointer-events:none; }
-.tos-content {
-  max-width: 800px;
-  width: 90%;
-  max-height: 85%;
-  overflow-y: auto;
-  background: rgba(0,0,0,0.95);
-  border: 1px solid rgba(255,255,255,0.06);
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 16px 36px rgba(0,0,0,0.5);
-  font-size:16px;
-  line-height:1.5;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
+.tos-content { max-width:800px; width:90%; max-height:85%; overflow-y:auto; background: rgba(0,0,0,0.95); border:1px solid rgba(255,255,255,0.06); padding:24px; border-radius:12px; box-shadow:0 16px 36px rgba(0,0,0,0.5); font-size:16px; line-height:1.5; transition: transform 0.3s ease, box-shadow 0.3s ease; }
 .tos-content:hover { box-shadow: 0 20px 48px rgba(0,0,0,0.6); }
 .tos-header { text-align:center; margin-bottom:12px; }
 .tos-header h2 { margin:0; font-size:20px; text-shadow: 0 0 8px rgba(255,255,255,0.12); }
 .tos-content h3 { margin-top:18px; margin-bottom:8px; color:#fff; text-shadow: 0 0 6px rgba(255,255,255,0.1); }
 .tos-content ol { padding-left: 20px; }
-.tos-accept { display:block; margin:18px auto 0; padding:12px 22px; font-size:16px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--text); cursor:pointer; box-shadow: 0 0 8px var(--glow); transition: transform .18s, box-shadow .18s; }
+.tos-accept { display:block; margin:18px auto 0; padding:12px 22px; font-size:16px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--text); cursor:pointer; box-shadow:0 0 8px var(--glow); transition: transform .18s, box-shadow .18s; }
 .tos-accept:hover { transform: translateY(-2px); box-shadow: 0 0 14px var(--glow); }
 
 /* scrollbar */
@@ -236,8 +219,8 @@ acceptTOS.addEventListener('click', () => {
 });
 
 lockBtn.addEventListener('click', ()=> location.href='admin.html');
-instructionsBtn.addEventListener('click', ()=> instructionsOverlay.style.display='flex');
-closeInstructions.addEventListener('click', ()=> instructionsOverlay.style.display='none');
+instructionsBtn.addEventListener('click', ()=> instructionsOverlay.classList.add('show'));
+closeInstructions.addEventListener('click', ()=> instructionsOverlay.classList.remove('show'));
 
 let bookmarks = {}, categories = {}, selectedCats = new Set(), currentSort = sortSelect.value, lastSearchTerm='';
 
@@ -283,25 +266,37 @@ function renderGrid(){
   if(arr.length===0){document.getElementById('placeholder').style.display='block'; return;} 
   else document.getElementById('placeholder').style.display='none';
 
-  if(currentSort==='alpha') arr.sort((a,b)=> (a[1].title||'').localeCompare(b[1].title||''));
-  else if(currentSort==='newest') arr.sort((a,b)=>b[1].added - a[1].added);
-  else if(currentSort==='popular') arr.sort((a,b)=>b[1].popularity - a[1].popularity);
+  if(currentSort==='alpha') arr.sort((a,b)=> (a[1].title||'').localeCompare(b[1].title||'')); 
+  else if(currentSort==='newest') arr.sort((a,b)=> (b[1].created||0)-(a[1].created||0)); 
+  else if(currentSort==='popular') arr.sort((a,b)=> (b[1].popularity||0)-(a[1].popularity||0));
 
   arr.forEach(([k,v])=>{
     const card=document.createElement('div'); card.className='card';
     card.innerHTML=`
-      <div class="card-head"><div class="titleSmall">${v.title||'No title'}</div>
-      ${v.categories?.length?'<div class="catTag">'+v.categories.map(c=>categories[c]?.name||c).join(', ')+'</div>':''}</div>
+      <div class="card-head">
+        <div class="titleSmall">${v.title||'Untitled'}</div>
+        <div class="catTag">${(v.categories||[]).map(c=>categories[c]?.name||c).join(', ')}</div>
+      </div>
       <div class="desc">${v.desc||''}</div>
-      <div class="actions"><button class="copy-square" data-code="${v.code||''}">📋</button></div>
-    `;
-    card.querySelector('.copy-square').addEventListener('click',()=>copyCode(v.code||'')); 
+      <div class="actions">
+        <div class="copy-square" title="Copy bookmarklet" data-code="${v.code||''}">
+          <img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/4aca40ab959224fb756c3d04fe34f266d635f477/lock-icon-clipart-free-png%20(1).webp" alt="Copy">
+        </div>
+      </div>`;
     grid.appendChild(card);
   });
-}
 
-function copyCode(code){navigator.clipboard.writeText(code||''); showToast('Copied to clipboard!');}
-function showToast(msg){toastText.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),1400);}
+  document.querySelectorAll('.copy-square').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const code=btn.dataset.code||'';
+      navigator.clipboard.writeText(code);
+      toastText.textContent='Copied to clipboard';
+      toast.classList.add('show');
+      setTimeout(()=>toast.classList.remove('show'),1800);
+    });
+  });
+}
 </script>
+
 </body>
 </html>
