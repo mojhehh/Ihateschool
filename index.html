@@ -13,7 +13,7 @@
 html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--text);font-family:Inter,sans-serif;}
 a{color:var(--text);text-decoration:underline;}
 .container{max-width:1100px;margin:18px auto;padding:14px;}
-.header{display:flex;align-items:center;gap:12px;padding:8px 0;}
+.header{display:flex;align-items:center;gap:12px;padding:8px 0;position:relative;z-index:2;}
 .logo{width:48px;height:48px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;}
 .logo img{width:100%;height:100%;object-fit:contain;}
 .title{font-size:20px;font-weight:600;}
@@ -60,12 +60,8 @@ a{color:var(--text);text-decoration:underline;}
 /* TOS modal */
 .tos-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 3000; transition: opacity 0.4s ease; pointer-events: auto; }
 .tos-overlay.hidden { opacity:0; pointer-events:none; }
-.tos-content { max-width:800px; width:90%; max-height:85%; overflow-y:auto; background: rgba(0,0,0,0.95); border:1px solid rgba(255,255,255,0.06); padding:24px; border-radius:12px; box-shadow:0 16px 36px rgba(0,0,0,0.5); font-size:16px; line-height:1.5; transition: transform 0.3s ease, box-shadow 0.3s ease; }
-.tos-content:hover { box-shadow: 0 20px 48px rgba(0,0,0,0.6); }
-.tos-header { text-align:center; margin-bottom:12px; }
-.tos-header h2 { margin:0; font-size:20px; text-shadow: 0 0 8px rgba(255,255,255,0.12); }
-.tos-content h3 { margin-top:18px; margin-bottom:8px; color:#fff; text-shadow: 0 0 6px rgba(255,255,255,0.1); }
-.tos-content ol { padding-left: 20px; }
+.tos-content { max-width:820px; width:92%; max-height:84%; overflow-y:auto; background: rgba(0,0,0,0.95); border:1px solid rgba(255,255,255,0.06); padding:28px; border-radius:12px; box-shadow:0 16px 36px rgba(0,0,0,0.5); font-size:16px; line-height:1.5; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.tos-content .row {display:flex;align-items:center;gap:12px;}
 .tos-accept { display:block; margin:18px auto 0; padding:12px 22px; font-size:16px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--text); cursor:pointer; box-shadow:0 0 8px var(--glow); transition: transform .18s, box-shadow .18s; }
 .tos-accept:hover { transform: translateY(-2px); box-shadow: 0 0 14px var(--glow); }
 
@@ -94,51 +90,54 @@ a{color:var(--text);text-decoration:underline;}
 <!-- TOS overlay -->
 <div id="tosOverlay" class="tos-overlay" role="dialog" aria-modal="true">
   <div class="tos-content">
-    <div class="tos-header">
-      <h2 class="glow-header">Veltra — Terms of Service & Privacy Policy</h2>
-      <p><strong>Last updated: October 28, 2025</strong></p>
+    <div class="tos-header" style="text-align:center;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px;">
+        <div style="width:56px;height:56px;border-radius:10px;overflow:hidden;">
+          <img id="tosHeaderLogoSmall" src="https://raw.githubusercontent.com/mojhehh/Ihateschool/77582cdf6ca35abff9636d884eadb3112e5c5269/black-and-white-geometric-logos-1%20(1).png" alt="logo" style="width:100%;height:100%;object-fit:contain;">
+        </div>
+        <h2 class="glow-header" style="margin:0">Veltra — Terms of Service & Privacy Policy</h2>
+      </div>
+      <p style="color:var(--muted);margin-top:8px"><strong>Last updated: October 28, 2025</strong></p>
     </div>
 
-    <p>Welcome to Veltra (“we,” “our,” or “us”). By accessing or using this website, you agree to the following Terms of Service and Privacy Policy. Please read carefully.</p>
+    <p>Welcome to Veltra (“we,” “our,” or “us”). By using this site you agree to these Terms and our Privacy Policy. Read them and accept to continue.</p>
 
     <h3 class="glow-header">Terms of Service</h3>
     <ol>
-      <li><strong>Educational Use Only</strong><br>All content on Veltra — including bookmarklets, code snippets, and other materials — is provided for educational purposes only.</li>
-      <li><strong>No Responsibility</strong><br>Veltra is not responsible for anything you do with the content on this site.</li>
-      <li><strong>Redistribution Notice</strong><br>Veltra acts as a redistributor. Most content on this website was not created by us.</li>
-      <li><strong>User Responsibilities</strong><br>By using Veltra, you agree to follow all applicable laws and not harm others.</li>
-      <li><strong>No Warranty</strong><br>All materials are provided “as is” without warranties of any kind.</li>
-      <li><strong>Intellectual Property</strong><br>Respect original creators’ rights.</li>
-      <li><strong>Links to Other Websites</strong><br>Veltra is not responsible for content on external websites.</li>
-      <li><strong>Changes to These Terms</strong><br>We may update these Terms at any time.</li>
-      <li><strong>Support</strong><br>Use the support page for questions or content removal requests.</li>
+      <li><strong>Educational Use Only</strong><br>All content is provided for educational purposes only.</li>
+      <li><strong>No Responsibility</strong><br>Veltra is not responsible for how you use the content.</li>
+      <li><strong>Redistribution Notice</strong><br>Some content comes from other sources; respect creators' rights.</li>
+      <li><strong>User Responsibilities</strong><br>Follow laws and be respectful to others.</li>
+      <li><strong>No Warranty</strong><br>The site is provided "as-is".</li>
+      <li><strong>Links</strong><br>We aren't liable for external sites.</li>
     </ol>
 
     <h3 class="glow-header">Privacy Policy</h3>
     <ol>
-      <li><strong>What We Collect</strong><br>Veltra does not directly collect personal info.</li>
-      <li><strong>Cookies and Analytics</strong><br>Only used for site functionality or traffic understanding.</li>
-      <li><strong>Links to Other Websites</strong><br>Always check privacy policies of external sites.</li>
-      <li><strong>Educational Purposes & Responsibility</strong><br>All content is for educational purposes; use at your own risk.</li>
+      <li><strong>What We Collect</strong><br>We do not directly collect personal info via this site; check external services.</li>
+      <li><strong>Cookies & Analytics</strong><br>We may use these for site functionality and basic traffic understanding.</li>
     </ol>
 
-    <button id="acceptTOS" class="tos-accept" aria-label="Accept terms">I Accept</button>
+    <div style="text-align:center;margin-top:14px">
+      <button id="acceptTOS" class="tos-accept" aria-label="Accept terms">I Accept</button>
+    </div>
   </div>
 </div>
 
-<!-- TOS flying logo -->
-<div id="tosLogo" style="width:48px;height:48px;border-radius:8px;z-index:3500;display:flex;align-items:center;justify-content:center;overflow:hidden;">
-  <img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/77582cdf6ca35abff9636d884eadb3112e5c5269/black-and-white-geometric-logos-1%20(1).png" alt="Veltra Logo" style="width:100%;height:100%;object-fit:contain;">
-</div>
+<!-- TOS floating logo (starts hidden or centered; script controls final position) -->
+<img id="tosLogo" src="https://raw.githubusercontent.com/mojhehh/Ihateschool/77582cdf6ca35abff9636d884eadb3112e5c5269/black-and-white-geometric-logos-1%20(1).png"
+     alt="Veltra Logo"
+     style="position:fixed;width:88px;height:88px;border-radius:12px;object-fit:contain;z-index:3500;display:none;pointer-events:none;">
 
+<!-- Main container (hidden while TOS active) -->
 <div class="container" id="appContent" aria-hidden="true">
   <div class="header">
-    <div class="logo"><img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/77582cdf6ca35abff9636d884eadb3112e5c5269/black-and-white-geometric-logos-1%20(1).png" alt="Veltra Logo"></div>
+    <div class="logo"><img id="headerLogoImg" src="https://raw.githubusercontent.com/mojhehh/Ihateschool/77582cdf6ca35abff9636d884eadb3112e5c5269/black-and-white-geometric-logos-1%20(1).png" alt="Veltra Logo"></div>
     <div>
       <div class="title">Veltra</div>
       <div class="tag">Bookmarks & bookmarklets — clean & quick</div>
     </div>
-    <div class="controls">
+    <div class="controls" aria-hidden="false">
       <input id="search" class="search" placeholder="Search... (press Enter)">
       <select id="sortSelect" class="select" title="Sort">
         <option value="newest">Newest</option>
@@ -160,8 +159,8 @@ a{color:var(--text);text-decoration:underline;}
     </div>
   </div>
 
-  <div id="grid" class="grid"></div>
-  <div id="placeholder" class="placeholder">No bookmarks match. Try another filter.</div>
+  <div id="grid" class="grid" aria-live="polite"></div>
+  <div id="placeholder" class="placeholder" style="display:none">No bookmarks match. Try another filter.</div>
 </div>
 
 <button id="lockBtn" title="Admin">
@@ -170,90 +169,293 @@ a{color:var(--text);text-decoration:underline;}
 
 <div id="toast" class="toast" role="status" aria-live="polite"><span id="toastText"></span></div>
 
-<!-- Instructions overlay -->
+<!-- Instructions overlay (kept simple) -->
 <div id="instructionsOverlay">
   <div class="content">
     <h2>Instructions</h2>
-    <p>Welcome to Veltra! Here’s how to use the bookmarks and bookmarklets:</p>
-    <ul>
-      <li>Click on a copy button to copy the bookmarklet code.</li>
-      <li>Use the category filters to narrow down bookmarks.</li>
-      <li>Sort bookmarks using the dropdown menu.</li>
-    </ul>
+    <p>Click the clipboard icon on any card to copy the bookmarklet code. Use the filter chips and search to find items fast.</p>
   </div>
   <button class="backBtn" id="closeInstructions">Back</button>
 </div>
 
 <script type="module">
-// Firebase imports (keep if needed)
+// ----- Firebase imports (keep these lines if you use firebase-config.js) -----
 import { db } from './firebase-config.js';
-import { ref, onValue } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
+import { ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
+// ---------------------------------------------------------------------------
 
+// UI nodes
 const tosOverlay = document.getElementById('tosOverlay');
 const acceptTOS = document.getElementById('acceptTOS');
-const appContent = document.getElementById('appContent');
 const tosLogo = document.getElementById('tosLogo');
-const headerLogo = document.querySelector('.header .logo img');
+const headerLogoImg = document.getElementById('headerLogoImg');
+const appContent = document.getElementById('appContent');
+const grid = document.getElementById('grid');
+const placeholder = document.getElementById('placeholder');
+const toast = document.getElementById('toast');
+const toastText = document.getElementById('toastText');
+const searchInput = document.getElementById('search');
+const sortSelect = document.getElementById('sortSelect');
+const catChips = document.getElementById('catChips');
+const clearCats = document.getElementById('clearCats');
+const activeCount = document.getElementById('activeCount');
+const instructionsBtn = document.getElementById('instructionsBtn');
+const instructionsOverlay = document.getElementById('instructionsOverlay');
+const closeInstructions = document.getElementById('closeInstructions');
 
+let bookmarks = {};    // will hold bookmark objects from firebase
+let categories = {};   // will hold categories from firebase
+let selectedCats = new Set();
+let lastSearchTerm = '';
+let currentSort = sortSelect.value || 'newest';
+
+// Defensive helpers: safeLower returns '' for undefined/null
+const safeLower = (v) => (v === undefined || v === null) ? '' : String(v).toLowerCase();
+
+// Show short toast
+function showToast(msg){
+  toastText.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(()=> toast.classList.remove('show'),1500);
+}
+
+// ---------------- TOS logic & animation ----------------
 const accepted = localStorage.getItem('veltraTOSAccepted') === 'true';
 
-function showTOS(show){
+// Center tosLogo when overlay active, hide when not active.
+// The animation will translate+scale tosLogo to the header's center and then hide the overlay.
+function placeTosLogoAtCenter(){
+  // show and center
+  tosLogo.style.display = 'block';
+  tosLogo.style.position = 'fixed';
+  tosLogo.style.transform = 'translate(-50%,-50%)';
+  tosLogo.style.left = '50%';
+  tosLogo.style.top = '50%';
+  tosLogo.style.width = '88px';
+  tosLogo.style.height = '88px';
+  tosLogo.classList.remove('tos-logo-glow');
+}
+
+function placeLogoIntoHeaderInstant(){
+  // place header logo visible and hide tosLogo
+  tosLogo.style.display = 'none';
+  headerLogoImg.style.visibility = 'visible';
+}
+
+function showTOSOverlay(show){
   if(show){
+    tosOverlay.style.display = 'flex';
     tosOverlay.classList.remove('hidden');
-    tosOverlay.style.display='flex';
-    tosLogo.style.position='fixed';
-    tosLogo.style.top='50%';
-    tosLogo.style.left='50%';
-    tosLogo.style.transform='translate(-50%,-50%)';
-    tosLogo.style.display='flex';
-    tosLogo.classList.remove('tos-logo-glow');
-    document.body.style.overflow='hidden';
+    placeTosLogoAtCenter();
+    document.body.style.overflow = 'hidden';
     appContent.setAttribute('aria-hidden','true');
-    headerLogo.style.visibility='hidden';
+    headerLogoImg.style.visibility = 'hidden';
   } else {
     tosOverlay.classList.add('hidden');
-    document.body.style.overflow='';
+    // let CSS transition run if any then hide overlay
+    setTimeout(()=> tosOverlay.style.display = 'none', 380);
+    document.body.style.overflow = '';
     appContent.setAttribute('aria-hidden','false');
-    setTimeout(()=> tosOverlay.style.display='none',400);
-
-    // Place logo in header
-    const rect = headerLogo.getBoundingClientRect();
-    tosLogo.style.transition='none';
-    tosLogo.style.position='absolute';
-    tosLogo.style.top = `${rect.top}px`;
-    tosLogo.style.left = `${rect.left}px`;
-    tosLogo.style.width = `${rect.width}px`;
-    tosLogo.style.height = `${rect.height}px`;
-    tosLogo.style.transform='translate(0,0)';
-    tosLogo.classList.add('tos-logo-glow');
-    headerLogo.style.visibility='visible';
   }
 }
 
-// Initial
+// if accepted already, skip overlay and show header logo
 if(accepted){
-  showTOS(false);
+  showTOSOverlay(false);
+  placeLogoIntoHeaderInstant();
+  appContent.removeAttribute('aria-hidden');
 } else {
-  showTOS(true);
+  showTOSOverlay(true);
 }
 
-acceptTOS.addEventListener('click', ()=>{
+// When user accepts: animate tosLogo -> header, then finalize
+acceptTOS.addEventListener('click', () => {
   localStorage.setItem('veltraTOSAccepted','true');
 
-  const headerRect = headerLogo.getBoundingClientRect();
+  // Ensure both images are measured
+  headerLogoImg.style.visibility = 'hidden'; // hide header copy during animation
+  placeTosLogoAtCenter();
+
+  // compute transform from tosLogo center to headerLogo center
+  const headerRect = headerLogoImg.getBoundingClientRect();
   const tosRect = tosLogo.getBoundingClientRect();
-  const deltaX = headerRect.left - tosRect.left;
-  const deltaY = headerRect.top - tosRect.top;
-  const scaleX = headerRect.width / tosRect.width;
-  const scaleY = headerRect.height / tosRect.height;
+  const tosCenterX = tosRect.left + tosRect.width/2;
+  const tosCenterY = tosRect.top + tosRect.height/2;
+  const headerCenterX = headerRect.left + headerRect.width/2;
+  const headerCenterY = headerRect.top + headerRect.height/2;
+  const deltaX = headerCenterX - tosCenterX;
+  const deltaY = headerCenterY - tosCenterY;
+  const scale = Math.min(headerRect.width / tosRect.width, headerRect.height / tosRect.height) || 1;
 
-  tosLogo.style.transition = 'transform 0.8s cubic-bezier(0.4,0,0.2,1)';
-  tosLogo.style.transform = `translate(${deltaX}px,${deltaY}px) scale(${scaleX},${scaleY})`;
+  // apply transform (translate + scale)
+  tosLogo.style.transition = 'transform 0.75s cubic-bezier(0.4,0,0.2,1), width 0.2s, height 0.2s';
+  tosLogo.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${scale})`;
+  // optional small scale pop
+  setTimeout(()=> {
+    tosLogo.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${scale*0.98})`;
+  }, 650);
 
-  tosLogo.addEventListener('transitionend', ()=>{
-    showTOS(false);
-  }, {once:true});
+  // after animation ends, finalize: hide tos overlay and show header logo image
+  tosLogo.addEventListener('transitionend', function done(){
+    tosLogo.removeEventListener('transitionend', done);
+    // hide floating logo and reveal header logo
+    tosLogo.style.display = 'none';
+    headerLogoImg.style.visibility = 'visible';
+    showTOSOverlay(false);
+  }, {once: true});
 });
+
+// --------------- Firebase listeners & rendering ----------------
+// categories is expected as {catId: {name: '...'}} or {catId: 'Name'}
+// bookmarks expected as {id: {title, desc, code, categories: ['catId'], created, popularity}}
+onValue(ref(db, 'categories'), snap => {
+  categories = snap.val() || {};
+  renderCategoryChips();
+  renderGrid(); // re-render in case names changed
+});
+
+onValue(ref(db, 'bookmarks'), snap => {
+  bookmarks = snap.val() || {};
+  renderGrid();
+});
+
+// Render category chips
+function renderCategoryChips(){
+  catChips.innerHTML = '';
+  const keys = Object.keys(categories || {});
+  if(keys.length === 0){
+    catChips.innerHTML = '<div class="small">No categories yet</div>';
+    return;
+  }
+  keys.sort((a,b) => {
+    const na = (categories[a]?.name || categories[a] || a).toString().toLowerCase();
+    const nb = (categories[b]?.name || categories[b] || b).toString().toLowerCase();
+    return na.localeCompare(nb);
+  }).forEach(k => {
+    const name = (categories[k]?.name || categories[k] || k).toString();
+    const btn = document.createElement('button');
+    btn.className = 'cat-chip';
+    btn.textContent = name;
+    btn.dataset.key = k;
+    btn.addEventListener('click', () => {
+      if(selectedCats.has(k)) selectedCats.delete(k);
+      else selectedCats.add(k);
+      btn.classList.toggle('selected', selectedCats.has(k));
+      renderGrid();
+    });
+    catChips.appendChild(btn);
+  });
+  updateSelectedUI();
+}
+
+function updateSelectedUI(){
+  activeCount.textContent = selectedCats.size > 0 ? `${selectedCats.size} selected` : 'All';
+}
+
+// Render the bookmark grid with safe checks
+function renderGrid(){
+  grid.innerHTML = '';
+  const term = safeLower(lastSearchTerm || '');
+
+  // convert bookmarks object into array
+  const entries = Object.entries(bookmarks || {});
+  // filter with safe checks
+  let arr = entries.filter(([id, item]) => {
+    if(!item) return false;
+    // category match
+    if(selectedCats.size > 0) {
+      const itemCats = Array.isArray(item.categories) ? item.categories : (item.categories ? [item.categories] : []);
+      const hasCat = itemCats.some(c => selectedCats.has(c));
+      if(!hasCat) return false;
+    }
+    // search match
+    if(term) {
+      const tTitle = safeLower(item.title || item.name || item.titleName || '');
+      const tDesc = safeLower(item.desc || item.description || item.summary || '');
+      if(!(tTitle.includes(term) || tDesc.includes(term))) return false;
+    }
+    return true;
+  });
+
+  // sort
+  if(currentSort === 'alpha') {
+    arr.sort((a,b) => ( (a[1].title || a[1].name || '') .toString().localeCompare((b[1].title || b[1].name || '') .toString()) ));
+  } else if(currentSort === 'newest') {
+    arr.sort((a,b) => ( (b[1].created || b[1].timestamp || 0) - (a[1].created || a[1].timestamp || 0) ));
+  } else if(currentSort === 'popular') {
+    arr.sort((a,b) => ( (b[1].popularity || b[1].uses || 0) - (a[1].popularity || a[1].uses || 0) ));
+  }
+
+  if(arr.length === 0){
+    placeholder.style.display = 'block';
+  } else {
+    placeholder.style.display = 'none';
+  }
+
+  arr.forEach(([id, v]) => {
+    const title = v.title || v.name || v.titleName || 'Untitled';
+    const desc = v.desc || v.description || v.summary || '';
+    // categories string
+    const catList = Array.isArray(v.categories) ? v.categories : (v.categories ? [v.categories] : []);
+    const catNames = catList.map(c => (categories[c]?.name || categories[c] || c)).filter(Boolean).join(', ');
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-head">
+        <div class="titleSmall">${escapeHtml(title)}</div>
+        <div class="catTag">${escapeHtml(catNames)}</div>
+      </div>
+      <div class="desc">${escapeHtml(desc)}</div>
+      <div class="actions">
+        <div class="copy-square" title="Copy bookmarklet" role="button" aria-label="Copy">
+          📋
+        </div>
+      </div>
+    `;
+    const copyBtn = card.querySelector('.copy-square');
+    copyBtn.addEventListener('click', async () => {
+      try {
+        const code = v.code || v.bookmarklet || v.payload || '';
+        await navigator.clipboard.writeText(code);
+        showToast('Copied to clipboard');
+        // increment clicks/popularity if you want (transaction)
+        if(id && typeof id === 'string') {
+          runTransaction(ref(db, `bookmarks/${id}/popularity`), c => (c || 0) + 1).catch(()=>{/* ignore */});
+        }
+      } catch(e) {
+        showToast('Copy failed');
+      }
+    });
+    grid.appendChild(card);
+  });
+
+  // update active count text
+  activeCount.textContent = selectedCats.size > 0 ? `${selectedCats.size} selected` : (arr.length ? `${arr.length} items` : 'All');
+}
+
+// small helper to avoid XSS in inserted text (we only insert small safe strings)
+function escapeHtml(str){
+  if(str === undefined || str === null) return '';
+  return String(str)
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'",'&#039;');
+}
+
+// UI events
+searchInput.addEventListener('keydown', e => { if(e.key === 'Enter'){ lastSearchTerm = searchInput.value.trim(); renderGrid(); }});
+sortSelect.addEventListener('change', () => { currentSort = sortSelect.value; renderGrid(); });
+clearCats.addEventListener('click', () => { selectedCats.clear(); document.querySelectorAll('.cat-chip.selected').forEach(el => el.classList.remove('selected')); renderGrid(); });
+instructionsBtn.addEventListener('click', ()=> { instructionsOverlay.classList.add('show'); });
+closeInstructions.addEventListener('click', ()=> { instructionsOverlay.classList.remove('show'); });
+
+// initial render (if firebase hasn't returned yet it'll render empty)
+renderCategoryChips();
+renderGrid();
+
 </script>
 </body>
 </html>
