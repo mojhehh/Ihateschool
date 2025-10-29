@@ -14,7 +14,8 @@ html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--text);
 a{color:var(--text);text-decoration:underline;}
 .container{max-width:1100px;margin:18px auto;padding:14px;}
 .header{display:flex;align-items:center;gap:12px;padding:8px 0;}
-.logo{width:48px;height:48px;border-radius:8px;background:#070707 center/contain no-repeat;display:flex;align-items:center;justify-content:center;text-indent:-9999px;}
+.logo{width:48px;height:48px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.logo img{width:100%;height:100%;object-fit:contain;}
 .title{font-size:20px;font-weight:600;}
 .tag{color:var(--muted);font-size:13px;margin-top:2px;}
 .controls{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
@@ -67,10 +68,6 @@ a{color:var(--text);text-decoration:underline;}
 .tos-content ol { padding-left: 20px; }
 .tos-accept { display:block; margin:18px auto 0; padding:12px 22px; font-size:16px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--text); cursor:pointer; box-shadow:0 0 8px var(--glow); transition: transform .18s, box-shadow .18s; }
 .tos-accept:hover { transform: translateY(-2px); box-shadow: 0 0 14px var(--glow); }
-
-/* scrollbar */
-.tos-overlay::-webkit-scrollbar { width:10px; }
-.tos-overlay::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius:6px; }
 
 /* glow headings */
 .glow-header { text-shadow: 0 0 4px rgba(255,255,255,0.18); transition: text-shadow .25s ease-in-out; }
@@ -125,15 +122,16 @@ a{color:var(--text);text-decoration:underline;}
 <!-- TOS flying logo -->
 <div id="tosLogo" style="
   position:fixed; top:100px; left:50%; transform:translateX(-50%);
-  width:48px; height:48px; background:#070707; border-radius:8px;
-  z-index:3500; display:flex; align-items:center; justify-content:center;
-  text-indent:-9999px;">
-  V
+  width:48px; height:48px; border-radius:8px; z-index:3500; display:flex;
+  align-items:center; justify-content:center; overflow:hidden;">
+  <img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/77582cdf6ca35abff9636d884eadb3112e5c5269/black-and-white-geometric-logos-1%20(1).png"
+       alt="Veltra Logo"
+       style="width:100%; height:100%; object-fit:contain;">
 </div>
 
 <div class="container" id="appContent" aria-hidden="true">
   <div class="header">
-    <div class="logo">V</div>
+    <div class="logo"><img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/77582cdf6ca35abff9636d884eadb3112e5c5269/black-and-white-geometric-logos-1%20(1).png" alt="Veltra Logo"></div>
     <div>
       <div class="title">Veltra</div>
       <div class="tag">Bookmarks & bookmarklets — clean & quick</div>
@@ -185,6 +183,7 @@ a{color:var(--text);text-decoration:underline;}
 </div>
 
 <script type="module">
+// Firebase imports
 import { db } from './firebase-config.js';
 import { ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 
@@ -205,9 +204,8 @@ const tosOverlay = document.getElementById('tosOverlay');
 const acceptTOS = document.getElementById('acceptTOS');
 const appContent = document.getElementById('appContent');
 const tosLogo = document.getElementById('tosLogo');
-const headerLogo = document.querySelector('.header .logo');
+const headerLogo = document.querySelector('.header .logo img');
 
-// Hide header logo initially
 headerLogo.style.visibility = 'hidden';
 
 function showTOS(show){
@@ -228,7 +226,6 @@ const accepted = localStorage.getItem('veltraTOSAccepted');
 showTOS(accepted !== 'true');
 
 acceptTOS.addEventListener('click', () => {
-  // Animate logo fly to header
   const headerRect = headerLogo.getBoundingClientRect();
   const tosRect = tosLogo.getBoundingClientRect();
   const deltaX = headerRect.left - tosRect.left;
@@ -262,67 +259,52 @@ onValue(ref(db,'categories'), snap => { categories = snap.val() || {}; renderCat
 onValue(ref(db,'bookmarks'), snap => { bookmarks = snap.val() || {}; renderGrid(); });
 
 function renderCategoryChips(){
-  catChips.innerHTML = '';
-  const keys = Object.keys(categories || {}).sort();
-  if(keys.length===0){ catChips.innerHTML='<div class="small">No categories yet</div>'; return; }
-  keys.forEach(k=>{
-    const name=categories[k]?.name||k;
-    const btn=document.createElement('button');
-    btn.className='cat-chip';
-    btn.textContent=name;
-    btn.dataset.key=k;
-    btn.addEventListener('click',()=>{
-      selectedCats.has(k)?selectedCats.delete(k):selectedCats.add(k);
-      btn.classList.toggle('selected');
-      renderGrid();
-    });
-    catChips.appendChild(btn);
+  catChips.innerHTML='';
+  Object.keys(categories).sort().forEach(cat=>{
+    const chip = document.createElement('div');
+    chip.textContent = categories[cat]; chip.className='cat-chip';
+    chip.onclick = ()=>{ chip.classList.toggle('selected'); if(chip.classList.contains('selected')) selectedCats.add(cat); else selectedCats.delete(cat); renderGrid(); };
+    catChips.appendChild(chip);
   });
 }
 
 function renderGrid(){
-  grid.innerHTML='';
-  let filtered = Object.values(bookmarks || {}).filter(b=>{
-    if(selectedCats.size>0 && !selectedCats.has(b.category)) return false;
-    const search=lastSearchTerm.toLowerCase();
-    return !search||b.title.toLowerCase().includes(search)||b.desc.toLowerCase().includes(search);
+  const term = lastSearchTerm.toLowerCase();
+  let filtered = Object.entries(bookmarks).filter(([id,b])=>{
+    const catMatch = selectedCats.size===0 || b.categories.some(c=>selectedCats.has(c));
+    const termMatch = b.name.toLowerCase().includes(term) || b.description.toLowerCase().includes(term);
+    return catMatch && termMatch;
   });
-  // sort
-  if(currentSort==='newest') filtered.sort((a,b)=>b.timestamp-a.timestamp);
-  else if(currentSort==='popular') filtered.sort((a,b)=>b.clicks-b.clicks);
-  else if(currentSort==='alpha') filtered.sort((a,b)=>a.title.localeCompare(b.title));
-  filtered.forEach(b=>{
-    const c=document.createElement('div'); c.className='card';
-    c.innerHTML=`
-      <div class="card-head">
-        <div class="titleSmall">${b.title}</div>
-        <div class="catTag">${categories[b.category]?.name||b.category}</div>
-      </div>
-      <div class="desc">${b.desc}</div>
-      <div class="actions">
-        <button class="copy-square" title="Copy bookmarklet">&#128203;</button>
-      </div>
-    `;
-    const copyBtn = c.querySelector('.copy-square');
-    copyBtn.addEventListener('click',()=>{
-      navigator.clipboard.writeText(b.code).then(()=>showToast('Copied!'));
-      runTransaction(ref(db,'bookmarks/'+b.id+'/clicks'), c => (c||0)+1);
-    });
-    grid.appendChild(c);
-  });
-  activeCount.textContent = filtered.length || 'None';
-  document.getElementById('placeholder').style.display = filtered.length?'none':'block';
-}
+  if(currentSort==='alpha') filtered.sort((a,b)=>a[1].name.localeCompare(b[1].name));
+  if(currentSort==='popular') filtered.sort((a,b)=>b[1].uses-a[1].uses);
+  if(currentSort==='newest') filtered.sort((a,b)=>b[1].timestamp-a[1].timestamp);
 
-searchInput.addEventListener('input',()=>{ lastSearchTerm=searchInput.value; renderGrid(); });
-sortSelect.addEventListener('change',()=>{ currentSort=sortSelect.value; renderGrid(); });
-clearCats.addEventListener('click',()=>{ selectedCats.clear(); document.querySelectorAll('.cat-chip.selected').forEach(el=>el.classList.remove('selected')); renderGrid(); });
+  grid.innerHTML='';
+  if(filtered.length===0){ document.getElementById('placeholder').style.display='block'; } else { document.getElementById('placeholder').style.display='none'; }
+  filtered.forEach(([id,b])=>{
+    const card = document.createElement('div'); card.className='card';
+    card.innerHTML=`<div class="card-head"><div class="titleSmall">${b.name}</div><div class="catTag">${b.categories.map(c=>categories[c]).join(', ')}</div></div>
+      <div class="desc">${b.description}</div>
+      <div class="actions">
+        <div class="copy-square" title="Copy code">📋</div>
+      </div>`;
+    const copyBtn = card.querySelector('.copy-square');
+    copyBtn.addEventListener('click', ()=>{ navigator.clipboard.writeText(b.code).then(()=> showToast('Copied!')); });
+    grid.appendChild(card);
+  });
+  activeCount.textContent=selectedCats.size>0 ? selectedCats.size+' selected' : 'All';
+}
 
 function showToast(msg){
   toastText.textContent=msg;
   toast.classList.add('show');
-  setTimeout(()=>toast.classList.remove('show'),1800);
+  setTimeout(()=> toast.classList.remove('show'),1500);
 }
+
+searchInput.addEventListener('keypress',e=>{if(e.key==='Enter'){lastSearchTerm=searchInput.value; renderGrid();}});
+sortSelect.addEventListener('change',()=>{currentSort=sortSelect.value; renderGrid();});
+clearCats.addEventListener('click',()=>{ selectedCats.clear(); document.querySelectorAll('.cat-chip.selected').forEach(c=>c.classList.remove('selected')); renderGrid(); });
+
 </script>
 </body>
 </html>
