@@ -69,7 +69,14 @@ a{color:var(--text);text-decoration:underline;}
 .tos-accept { display:block; margin:18px auto 0; padding:12px 22px; font-size:16px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--text); cursor:pointer; box-shadow:0 0 8px var(--glow); transition: transform .18s, box-shadow .18s; }
 .tos-accept:hover { transform: translateY(-2px); box-shadow: 0 0 14px var(--glow); }
 
-/* glow headings */
+/* logo glow */
+@keyframes logoGlow {
+  0% { box-shadow: 0 0 4px rgba(255,255,255,0.1); }
+  50% { box-shadow: 0 0 14px rgba(255,255,255,0.25); }
+  100% { box-shadow: 0 0 4px rgba(255,255,255,0.1); }
+}
+.tos-logo-glow { animation: logoGlow 2.5s infinite ease-in-out; }
+
 .glow-header { text-shadow: 0 0 4px rgba(255,255,255,0.18); transition: text-shadow .25s ease-in-out; }
 
 /* responsive tweaks */
@@ -120,13 +127,8 @@ a{color:var(--text);text-decoration:underline;}
 </div>
 
 <!-- TOS flying logo -->
-<div id="tosLogo" style="
-  position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-  width:48px; height:48px; border-radius:8px; z-index:3500; display:flex;
-  align-items:center; justify-content:center; overflow:hidden;">
-  <img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/77582cdf6ca35abff9636d884eadb3112e5c5269/black-and-white-geometric-logos-1%20(1).png"
-       alt="Veltra Logo"
-       style="width:100%; height:100%; object-fit:contain;">
+<div id="tosLogo" style="width:48px;height:48px;border-radius:8px;z-index:3500;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+  <img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/77582cdf6ca35abff9636d884eadb3112e5c5269/black-and-white-geometric-logos-1%20(1).png" alt="Veltra Logo" style="width:100%;height:100%;object-fit:contain;">
 </div>
 
 <div class="container" id="appContent" aria-hidden="true">
@@ -183,22 +185,9 @@ a{color:var(--text);text-decoration:underline;}
 </div>
 
 <script type="module">
-// Firebase imports
+// Firebase imports (keep if needed)
 import { db } from './firebase-config.js';
 import { ref, onValue } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
-
-const grid = document.getElementById('grid');
-const toast = document.getElementById('toast');
-const toastText = document.getElementById('toastText');
-const searchInput = document.getElementById('search');
-const sortSelect = document.getElementById('sortSelect');
-const catChips = document.getElementById('catChips');
-const clearCats = document.getElementById('clearCats');
-const activeCount = document.getElementById('activeCount');
-const instructionsBtn = document.getElementById('instructionsBtn');
-const lockBtn = document.getElementById('lockBtn');
-const instructionsOverlay = document.getElementById('instructionsOverlay');
-const closeInstructions = document.getElementById('closeInstructions');
 
 const tosOverlay = document.getElementById('tosOverlay');
 const acceptTOS = document.getElementById('acceptTOS');
@@ -206,56 +195,64 @@ const appContent = document.getElementById('appContent');
 const tosLogo = document.getElementById('tosLogo');
 const headerLogo = document.querySelector('.header .logo img');
 
-// Determine if TOS was previously accepted
 const accepted = localStorage.getItem('veltraTOSAccepted') === 'true';
 
 function showTOS(show){
   if(show){
     tosOverlay.classList.remove('hidden');
-    tosOverlay.style.display = 'flex';
-    tosLogo.style.display = 'flex';
-    tosLogo.style.top = '50%';
-    tosLogo.style.left = '50%';
-    tosLogo.style.transform = 'translate(-50%,-50%)';
-    document.body.style.overflow = 'hidden';
+    tosOverlay.style.display='flex';
+    tosLogo.style.position='fixed';
+    tosLogo.style.top='50%';
+    tosLogo.style.left='50%';
+    tosLogo.style.transform='translate(-50%,-50%)';
+    tosLogo.style.display='flex';
+    tosLogo.classList.remove('tos-logo-glow');
+    document.body.style.overflow='hidden';
     appContent.setAttribute('aria-hidden','true');
-    headerLogo.style.visibility = 'hidden';
+    headerLogo.style.visibility='hidden';
   } else {
     tosOverlay.classList.add('hidden');
-    document.body.style.overflow = '';
+    document.body.style.overflow='';
     appContent.setAttribute('aria-hidden','false');
-    setTimeout(()=> tosOverlay.style.display='none', 400);
-    // place logo in header if TOS was accepted
+    setTimeout(()=> tosOverlay.style.display='none',400);
+
+    // Place logo in header
+    const rect = headerLogo.getBoundingClientRect();
     tosLogo.style.transition='none';
     tosLogo.style.position='absolute';
-    const rect = headerLogo.getBoundingClientRect();
     tosLogo.style.top = `${rect.top}px`;
     tosLogo.style.left = `${rect.left}px`;
+    tosLogo.style.width = `${rect.width}px`;
+    tosLogo.style.height = `${rect.height}px`;
     tosLogo.style.transform='translate(0,0)';
-    headerLogo.style.visibility = 'visible';
+    tosLogo.classList.add('tos-logo-glow');
+    headerLogo.style.visibility='visible';
   }
 }
 
-showTOS(!accepted);
+// Initial
+if(accepted){
+  showTOS(false);
+} else {
+  showTOS(true);
+}
 
-acceptTOS.addEventListener('click', () => {
+acceptTOS.addEventListener('click', ()=>{
   localStorage.setItem('veltraTOSAccepted','true');
 
   const headerRect = headerLogo.getBoundingClientRect();
   const tosRect = tosLogo.getBoundingClientRect();
   const deltaX = headerRect.left - tosRect.left;
   const deltaY = headerRect.top - tosRect.top;
-  const scaleUp = 1.3;
+  const scaleX = headerRect.width / tosRect.width;
+  const scaleY = headerRect.height / tosRect.height;
 
   tosLogo.style.transition = 'transform 0.8s cubic-bezier(0.4,0,0.2,1)';
-  tosLogo.style.transform = `translate(${deltaX}px,${deltaY}px) scale(${scaleUp})`;
+  tosLogo.style.transform = `translate(${deltaX}px,${deltaY}px) scale(${scaleX},${scaleY})`;
 
-  setTimeout(() => {
-    tosLogo.style.transition = 'transform 0.3s ease-out';
-    tosLogo.style.transform = `translate(${deltaX}px,${deltaY}px) scale(1)`;
-  },500);
-
-  tosLogo.addEventListener('transitionend', () => showTOS(false), { once:true });
+  tosLogo.addEventListener('transitionend', ()=>{
+    showTOS(false);
+  }, {once:true});
 });
 </script>
 </body>
