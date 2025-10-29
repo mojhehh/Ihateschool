@@ -37,7 +37,7 @@ a{color:var(--text);text-decoration:underline;}
 .desc{color:var(--muted);font-size:13px;margin:8px 0;min-height:38px;}
 .actions{display:flex;gap:8px;align-items:center;}
 .copy-square{width:44px;height:44px;border-radius:8px;border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:transparent;color:var(--text);font-weight:700;font-size:20px;}
-.copy-square img{width:24px;height:24px;}
+.copy-square img{width:20px;height:20px;display:block;}
 .copy-square:hover{box-shadow:0 0 10px var(--glow);transform:translateY(-2px);}
 .toast{position:fixed;left:50%;transform:translateX(-50%);top:14px;padding:12px 18px;border-radius:999px;background:#000;color:#fff;box-shadow:0 10px 30px rgba(255,255,255,0.12);z-index:999;opacity:0;pointer-events:none;transition:opacity 0.3s;}
 .toast.show{opacity:1;}
@@ -124,12 +124,13 @@ a{color:var(--text);text-decoration:underline;}
   </div>
 </div>
 
-<!-- TOS floating logo (starts hidden or centered; script controls final position) -->
-<img id="tosLogo" src="https://raw.githubusercontent.com/mojhehh/Ihateschool/77582cdf6ca35abff9636d884eadb3112e5c5269/black-and-white-geometric-logos-1%20(1).png"
+<!-- TOS floating logo (script controls show/animate) -->
+<img id="tosLogo"
+     src="https://raw.githubusercontent.com/mojhehh/Ihateschool/77582cdf6ca35abff9636d884eadb3112e5c5269/black-and-white-geometric-logos-1%20(1).png"
      alt="Veltra Logo"
      style="position:fixed;width:88px;height:88px;border-radius:12px;object-fit:contain;z-index:3500;display:none;pointer-events:none;">
 
-<!-- Main container (hidden while TOS active) -->
+<!-- Main container -->
 <div class="container" id="appContent" aria-hidden="true">
   <div class="header">
     <div class="logo"><img id="headerLogoImg" src="https://raw.githubusercontent.com/mojhehh/Ihateschool/77582cdf6ca35abff9636d884eadb3112e5c5269/black-and-white-geometric-logos-1%20(1).png" alt="Veltra Logo"></div>
@@ -169,17 +170,17 @@ a{color:var(--text);text-decoration:underline;}
 
 <div id="toast" class="toast" role="status" aria-live="polite"><span id="toastText"></span></div>
 
-<!-- Instructions overlay (kept simple) -->
+<!-- Instructions overlay -->
 <div id="instructionsOverlay">
   <div class="content">
     <h2>Instructions</h2>
-    <p>Click the clipboard icon on any card to copy the bookmarklet code. Use the filter chips and search to find items fast.</p>
+    <p>Click the copy button on any card to copy the bookmarklet code. Use the filter chips and search to find items fast.</p>
   </div>
   <button class="backBtn" id="closeInstructions">Back</button>
 </div>
 
 <script type="module">
-// ----- Firebase imports (keep these lines if you use firebase-config.js) -----
+// ----- Firebase imports (keep if you use firebase-config.js) -----
 import { db } from './firebase-config.js';
 import { ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 // ---------------------------------------------------------------------------
@@ -223,9 +224,7 @@ function showToast(msg){
 const accepted = localStorage.getItem('veltraTOSAccepted') === 'true';
 
 // Center tosLogo when overlay active, hide when not active.
-// The animation will translate+scale tosLogo to the header's center and then hide the overlay.
 function placeTosLogoAtCenter(){
-  // show and center
   tosLogo.style.display = 'block';
   tosLogo.style.position = 'fixed';
   tosLogo.style.transform = 'translate(-50%,-50%)';
@@ -237,7 +236,6 @@ function placeTosLogoAtCenter(){
 }
 
 function placeLogoIntoHeaderInstant(){
-  // place header logo visible and hide tosLogo
   tosLogo.style.display = 'none';
   headerLogoImg.style.visibility = 'visible';
 }
@@ -252,7 +250,6 @@ function showTOSOverlay(show){
     headerLogoImg.style.visibility = 'hidden';
   } else {
     tosOverlay.classList.add('hidden');
-    // let CSS transition run if any then hide overlay
     setTimeout(()=> tosOverlay.style.display = 'none', 380);
     document.body.style.overflow = '';
     appContent.setAttribute('aria-hidden','false');
@@ -272,8 +269,8 @@ if(accepted){
 acceptTOS.addEventListener('click', () => {
   localStorage.setItem('veltraTOSAccepted','true');
 
-  // Ensure both images are measured
-  headerLogoImg.style.visibility = 'hidden'; // hide header copy during animation
+  // hide header logo during animation so we can animate the floating logo into its spot
+  headerLogoImg.style.visibility = 'hidden';
   placeTosLogoAtCenter();
 
   // compute transform from tosLogo center to headerLogo center
@@ -290,15 +287,14 @@ acceptTOS.addEventListener('click', () => {
   // apply transform (translate + scale)
   tosLogo.style.transition = 'transform 0.75s cubic-bezier(0.4,0,0.2,1), width 0.2s, height 0.2s';
   tosLogo.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${scale})`;
-  // optional small scale pop
+
+  // small pop/tuck effect
   setTimeout(()=> {
     tosLogo.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${scale*0.98})`;
   }, 650);
 
-  // after animation ends, finalize: hide tos overlay and show header logo image
   tosLogo.addEventListener('transitionend', function done(){
     tosLogo.removeEventListener('transitionend', done);
-    // hide floating logo and reveal header logo
     tosLogo.style.display = 'none';
     headerLogoImg.style.visibility = 'visible';
     showTOSOverlay(false);
@@ -392,6 +388,9 @@ function renderGrid(){
     placeholder.style.display = 'none';
   }
 
+  // the copy icon you sent (raw.githubusercontent url)
+  const copyIconUrl = 'https://raw.githubusercontent.com/mojhehh/Ihateschool/23f1e035ed36135ffc71bc8bdbdd59cf2944f363/pngtree-vector-copy-icon-png-image_4162801.jpg';
+
   arr.forEach(([id, v]) => {
     const title = v.title || v.name || v.titleName || 'Untitled';
     const desc = v.desc || v.description || v.summary || '';
@@ -409,7 +408,7 @@ function renderGrid(){
       <div class="desc">${escapeHtml(desc)}</div>
       <div class="actions">
         <div class="copy-square" title="Copy bookmarklet" role="button" aria-label="Copy">
-          📋
+          <img src="${copyIconUrl}" alt="Copy" onerror="this.style.display='none'; this.parentElement.textContent='📋'">
         </div>
       </div>
     `;
