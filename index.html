@@ -58,7 +58,7 @@ a{color:var(--text);text-decoration:underline;}
 .placeholder{text-align:center;padding:40px;color:var(--muted);grid-column:1/-1;border-radius:12px;border:1px solid rgba(255,255,255,0.02);}
 
 /* TOS modal */
-.tos-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 3000; opacity: 1; transition: opacity 0.4s ease; pointer-events: auto; }
+.tos-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 3000; transition: opacity 0.4s ease; pointer-events: auto; }
 .tos-overlay.hidden { opacity:0; pointer-events:none; }
 .tos-content { max-width:800px; width:90%; max-height:85%; overflow-y:auto; background: rgba(0,0,0,0.95); border:1px solid rgba(255,255,255,0.06); padding:24px; border-radius:12px; box-shadow:0 16px 36px rgba(0,0,0,0.5); font-size:16px; line-height:1.5; transition: transform 0.3s ease, box-shadow 0.3s ease; }
 .tos-content:hover { box-shadow: 0 20px 48px rgba(0,0,0,0.6); }
@@ -121,7 +121,7 @@ a{color:var(--text);text-decoration:underline;}
 
 <!-- TOS flying logo -->
 <div id="tosLogo" style="
-  position:fixed; top:100px; left:50%; transform:translateX(-50%);
+  position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
   width:48px; height:48px; border-radius:8px; z-index:3500; display:flex;
   align-items:center; justify-content:center; overflow:hidden;">
   <img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/77582cdf6ca35abff9636d884eadb3112e5c5269/black-and-white-geometric-logos-1%20(1).png"
@@ -185,7 +185,7 @@ a{color:var(--text);text-decoration:underline;}
 <script type="module">
 // Firebase imports
 import { db } from './firebase-config.js';
-import { ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
+import { ref, onValue } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 
 const grid = document.getElementById('grid');
 const toast = document.getElementById('toast');
@@ -206,105 +206,57 @@ const appContent = document.getElementById('appContent');
 const tosLogo = document.getElementById('tosLogo');
 const headerLogo = document.querySelector('.header .logo img');
 
-headerLogo.style.visibility = 'hidden';
+// Determine if TOS was previously accepted
+const accepted = localStorage.getItem('veltraTOSAccepted') === 'true';
 
 function showTOS(show){
   if(show){
     tosOverlay.classList.remove('hidden');
     tosOverlay.style.display = 'flex';
+    tosLogo.style.display = 'flex';
+    tosLogo.style.top = '50%';
+    tosLogo.style.left = '50%';
+    tosLogo.style.transform = 'translate(-50%,-50%)';
     document.body.style.overflow = 'hidden';
     appContent.setAttribute('aria-hidden','true');
+    headerLogo.style.visibility = 'hidden';
   } else {
     tosOverlay.classList.add('hidden');
     document.body.style.overflow = '';
     appContent.setAttribute('aria-hidden','false');
     setTimeout(()=> tosOverlay.style.display='none', 400);
+    // place logo in header if TOS was accepted
+    tosLogo.style.transition='none';
+    tosLogo.style.position='absolute';
+    const rect = headerLogo.getBoundingClientRect();
+    tosLogo.style.top = `${rect.top}px`;
+    tosLogo.style.left = `${rect.left}px`;
+    tosLogo.style.transform='translate(0,0)';
+    headerLogo.style.visibility = 'visible';
   }
 }
 
-const accepted = localStorage.getItem('veltraTOSAccepted');
-showTOS(accepted !== 'true');
+showTOS(!accepted);
 
 acceptTOS.addEventListener('click', () => {
+  localStorage.setItem('veltraTOSAccepted','true');
+
   const headerRect = headerLogo.getBoundingClientRect();
   const tosRect = tosLogo.getBoundingClientRect();
   const deltaX = headerRect.left - tosRect.left;
   const deltaY = headerRect.top - tosRect.top;
   const scaleUp = 1.3;
 
-  tosLogo.style.transition = 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
-  tosLogo.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${scaleUp})`;
+  tosLogo.style.transition = 'transform 0.8s cubic-bezier(0.4,0,0.2,1)';
+  tosLogo.style.transform = `translate(${deltaX}px,${deltaY}px) scale(${scaleUp})`;
 
   setTimeout(() => {
     tosLogo.style.transition = 'transform 0.3s ease-out';
-    tosLogo.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(1)`;
-  }, 500);
+    tosLogo.style.transform = `translate(${deltaX}px,${deltaY}px) scale(1)`;
+  },500);
 
-  tosLogo.addEventListener('transitionend', () => {
-    tosLogo.style.display = 'none';
-    headerLogo.style.visibility = 'visible';
-  }, { once: true });
-
-  localStorage.setItem('veltraTOSAccepted','true');
-  showTOS(false);
+  tosLogo.addEventListener('transitionend', () => showTOS(false), { once:true });
 });
-
-lockBtn.addEventListener('click', ()=> location.href='admin.html');
-instructionsBtn.addEventListener('click', ()=> instructionsOverlay.classList.add('show'));
-closeInstructions.addEventListener('click', ()=> instructionsOverlay.classList.remove('show'));
-
-let bookmarks = {}, categories = {}, selectedCats = new Set(), currentSort = sortSelect.value, lastSearchTerm='';
-
-onValue(ref(db,'categories'), snap => { categories = snap.val() || {}; renderCategoryChips(); });
-onValue(ref(db,'bookmarks'), snap => { bookmarks = snap.val() || {}; renderGrid(); });
-
-function renderCategoryChips(){
-  catChips.innerHTML='';
-  Object.keys(categories).sort().forEach(cat=>{
-    const chip = document.createElement('div');
-    chip.textContent = categories[cat]; chip.className='cat-chip';
-    chip.onclick = ()=>{ chip.classList.toggle('selected'); if(chip.classList.contains('selected')) selectedCats.add(cat); else selectedCats.delete(cat); renderGrid(); };
-    catChips.appendChild(chip);
-  });
-}
-
-function renderGrid(){
-  const term = lastSearchTerm.toLowerCase();
-  let filtered = Object.entries(bookmarks).filter(([id,b])=>{
-    const catMatch = selectedCats.size===0 || b.categories.some(c=>selectedCats.has(c));
-    const termMatch = b.name.toLowerCase().includes(term) || b.description.toLowerCase().includes(term);
-    return catMatch && termMatch;
-  });
-  if(currentSort==='alpha') filtered.sort((a,b)=>a[1].name.localeCompare(b[1].name));
-  if(currentSort==='popular') filtered.sort((a,b)=>b[1].uses-a[1].uses);
-  if(currentSort==='newest') filtered.sort((a,b)=>b[1].timestamp-a[1].timestamp);
-
-  grid.innerHTML='';
-  if(filtered.length===0){ document.getElementById('placeholder').style.display='block'; } else { document.getElementById('placeholder').style.display='none'; }
-  filtered.forEach(([id,b])=>{
-    const card = document.createElement('div'); card.className='card';
-    card.innerHTML=`<div class="card-head"><div class="titleSmall">${b.name}</div><div class="catTag">${b.categories.map(c=>categories[c]).join(', ')}</div></div>
-      <div class="desc">${b.description}</div>
-      <div class="actions">
-        <div class="copy-square" title="Copy code">📋</div>
-      </div>`;
-    const copyBtn = card.querySelector('.copy-square');
-    copyBtn.addEventListener('click', ()=>{ navigator.clipboard.writeText(b.code).then(()=> showToast('Copied!')); });
-    grid.appendChild(card);
-  });
-  activeCount.textContent=selectedCats.size>0 ? selectedCats.size+' selected' : 'All';
-}
-
-function showToast(msg){
-  toastText.textContent=msg;
-  toast.classList.add('show');
-  setTimeout(()=> toast.classList.remove('show'),1500);
-}
-
-searchInput.addEventListener('keypress',e=>{if(e.key==='Enter'){lastSearchTerm=searchInput.value; renderGrid();}});
-sortSelect.addEventListener('change',()=>{currentSort=sortSelect.value; renderGrid();});
-clearCats.addEventListener('click',()=>{ selectedCats.clear(); document.querySelectorAll('.cat-chip.selected').forEach(c=>c.classList.remove('selected')); renderGrid(); });
-
 </script>
 </body>
 </html>
