@@ -11,7 +11,7 @@
   --card-bg:rgba(255,255,255,0.02);
 }
 html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--text);font-family:Inter,sans-serif;}
-a{color:var(--text);text-decoration:underline;}
+a{color:var(--text);text-decoration:underline;cursor:pointer;}
 .container{max-width:1100px;margin:18px auto;padding:14px;}
 .header{display:flex;align-items:center;gap:12px;padding:8px 0;position:relative;z-index:2;}
 .logo{width:48px;height:48px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .8s ease;}
@@ -37,70 +37,47 @@ a{color:var(--text);text-decoration:underline;}
 .catTag{font-size:12px;padding:6px;border-radius:8px;border:1px solid var(--border);color:var(--text);background:transparent;}
 .desc{color:var(--muted);font-size:13px;margin:8px 0;min-height:38px;}
 .actions{display:flex;gap:8px;align-items:center;}
-.copy-square{width:44px;height:44px;border-radius:8px;border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:transparent;color:var(--text);font-weight:700;font-size:20px;}
-.copy-square img{width:20px;height:20px;display:block;}
+.copy-square{width:44px;height:44px;border-radius:8px;border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:transparent;color:var(--text);}
+.copy-square img{width:20px;height:20px;}
 .copy-square:hover{box-shadow:0 0 10px var(--glow);transform:translateY(-2px);}
 .toast{position:fixed;left:50%;transform:translateX(-50%);top:14px;padding:12px 18px;border-radius:999px;background:#000;color:#fff;box-shadow:0 10px 30px rgba(255,255,255,0.12);z-index:999;opacity:0;pointer-events:none;transition:opacity 0.3s;}
 .toast.show{opacity:1;}
-#lockBtn{position:fixed;top:16px;right:16px;width:40px;height:40px;border-radius:8px;padding:6px;border:1px solid var(--border);background:transparent;cursor:pointer;opacity:0.8;z-index:1000;transition:transform 0.2s,opacity 0.2s;}
-#lockBtn img{width:100%;height:100%;display:block;}
-#lockBtn:hover{transform:scale(1.2);opacity:1;}
-#instructionsOverlay{
-  position:fixed; top:0; left:0; width:100%; height:100%;
-  background:rgba(0,0,0,0.95); color:#fff;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  z-index:2000; padding:40px; overflow:auto;
-  opacity:0; pointer-events:none; transition:opacity 0.3s ease;
+#lockBtn{position:fixed;top:16px;right:16px;width:40px;height:40px;border-radius:8px;padding:6px;border:1px solid var(--border);background:transparent;cursor:pointer;opacity:0.8;z-index:1000;}
+#lockBtn img{width:100%;height:100%;}
+#instructionsOverlay, #tosOverlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);color:#fff;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:2000;padding:40px;overflow:auto;opacity:0;pointer-events:none;transition:opacity 0.4s ease;
 }
-#instructionsOverlay.show { opacity:1; pointer-events:auto; }
-#instructionsOverlay .content{max-width:800px; text-align:left; font-size:18px; }
-#instructionsOverlay .backBtn{margin-top:20px;padding:10px 16px;font-size:16px;border:1px solid var(--border);background:transparent;color:#fff;border-radius:8px;cursor:pointer;}
+.showOverlay{opacity:1;pointer-events:auto;}
+.overlay-content{max-width:800px;text-align:left;font-size:18px;}
+.backBtn{margin-top:20px;padding:10px 16px;font-size:16px;border:1px solid var(--border);background:transparent;color:#fff;border-radius:8px;cursor:pointer;}
 .placeholder{text-align:center;padding:40px;color:var(--muted);grid-column:1/-1;border-radius:12px;border:1px solid rgba(255,255,255,0.02);}
-.adminOverlay{
-  position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:3000;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.3s;
-}
-.adminOverlay.show{opacity:1;pointer-events:auto;}
-.adminOverlay input{margin:6px 0;padding:10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:#fff;width:250px;}
-.adminOverlay button{margin-top:12px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:#fff;cursor:pointer;}
-@media (max-width:1024px){
-  .grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
-  .controls{flex-direction:column;gap:8px;align-items:stretch;}
-  .search{min-width:100%;}
-  .copy-square{width:60px;height:60px;font-size:24px;}
-}
 </style>
 </head>
 <body>
 
-<!-- TOS overlay -->
-<div id="tosOverlay" class="tos-overlay" role="dialog" aria-modal="true">
-  <div class="tos-content">
-    <div class="tos-header" style="text-align:center;margin-bottom:12px;">
-      <div style="display:flex;align-items:center;justify-content:center;gap:12px;">
-        <div style="width:56px;height:56px;border-radius:10px;overflow:hidden;">
-          <img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/77582cdf6ca35abff9636d884eadb3112e5c5269/black-and-white-geometric-logos-1%20(1).png" alt="logo" style="width:100%;height:100%;object-fit:contain;">
-        </div>
-        <h2 class="glow-header" style="margin:0">Veltra — Terms of Service & Privacy Policy</h2>
-      </div>
-      <p style="color:var(--muted);margin-top:8px"><strong>Last updated: October 28, 2025</strong></p>
-    </div>
-    <p>Welcome to Veltra. By using this site you agree to these Terms and our Privacy Policy.</p>
-    <div style="text-align:center;margin-top:14px">
-      <button id="acceptTOS">I Accept</button>
-    </div>
+<!-- TOS -->
+<div id="tosOverlay">
+  <div class="overlay-content" style="text-align:center">
+    <h2>Veltra — Terms of Service & Privacy Policy</h2>
+    <p>Welcome to Veltra! Before using our site, please read this carefully.</p>
+    <p><strong>We collect minimal data</strong> (like your bookmarks and basic usage info) to make the experience better. By continuing, you agree to our TOS and Privacy Policy.</p>
+    <p>We are not responsible for misuse of bookmarklets or links shared through this site.</p>
+    <button id="acceptTOS" class="backBtn">I Accept</button>
   </div>
 </div>
 
-<!-- Main container -->
-<div class="container" id="appContent" aria-hidden="true">
+<!-- Main UI -->
+<div class="container" id="mainApp" style="display:none;">
   <div class="header">
-    <div class="logo" id="headerLogoContainer"><img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/77582cdf6ca35abff9636d884eadb3112e5c5269/black-and-white-geometric-logos-1%20(1).png" alt="Veltra Logo"></div>
+    <div class="logo" id="headerLogoContainer"><img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/main/black-and-white-geometric-logos-1%20(1).png" alt="Logo"></div>
     <div>
       <div class="title">Veltra</div>
       <div class="tag">Bookmarks & bookmarklets — clean & quick</div>
     </div>
     <div class="controls">
-      <input id="search" class="search" placeholder="Search... (press Enter)">
+      <input id="search" class="search" placeholder="Search...">
       <button id="instructionsBtn" class="btn">Instructions</button>
     </div>
   </div>
@@ -116,182 +93,106 @@ a{color:var(--text);text-decoration:underline;}
     </div>
   </div>
 
-  <div id="grid" class="grid" aria-live="polite"></div>
-  <div id="placeholder" class="placeholder" style="display:none">No bookmarks match. Try another filter.</div>
+  <div id="grid" class="grid"></div>
+  <div id="placeholder" class="placeholder" style="display:none;">No bookmarks match.</div>
 </div>
 
-<button id="lockBtn" title="Admin">
-  <img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/4aca40ab959224fb756c3d04fe34f266d635f477/lock-icon-clipart-free-png%20(1).webp" alt="Admin Lock">
-</button>
-
+<button id="lockBtn"><img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/main/lock-icon-clipart-free-png%20(1).webp"></button>
 <div id="toast" class="toast"><span id="toastText"></span></div>
 
-<!-- Instructions overlay -->
+<!-- Instructions -->
 <div id="instructionsOverlay">
-  <div class="content">
-    <h2>Instructions</h2>
-    <p>Click the copy button on any card to copy the bookmarklet code. Use the filter chips and search to find items fast.</p>
+  <div class="overlay-content">
+    <h2>How to Use Veltra Bookmarklets (Safari)</h2>
+    <ol>
+      <li>Open Safari on your Mac or iPad.</li>
+      <li>Click the <strong>Share</strong> button and choose <em>Add Bookmark</em>.</li>
+      <li>Save it in the <strong>Favorites</strong> or <strong>Bookmarks Bar</strong>.</li>
+      <li>After saving, open <strong>Edit Bookmarks</strong> and paste the copied code into the URL field.</li>
+      <li>Now you can click that bookmark anytime to run the code!</li>
+    </ol>
   </div>
-  <button class="backBtn" id="closeInstructions">Back</button>
-</div>
-
-<!-- Admin login overlay -->
-<div id="adminOverlay" class="adminOverlay">
-  <h2>Admin Login</h2>
-  <input type="password" id="adminPass" placeholder="Enter password">
-  <button id="adminLoginBtn">Login</button>
+  <button id="closeInstructions" class="backBtn">Back</button>
 </div>
 
 <script type="module">
-import { app, db, auth } from './firebaseConfig.js';
+import { app, db } from './firebase-config.js';
 import { ref, get } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 
-// ---------- TOS ----------
-const tosOverlay = document.getElementById('tosOverlay');
-const acceptTOS = document.getElementById('acceptTOS');
-const headerLogoContainer = document.getElementById('headerLogoContainer');
-const appContent = document.getElementById('appContent');
-if(localStorage.getItem('veltraTOSAccepted')==='true'){ showTOSOverlay(false); } else { showTOSOverlay(true); }
-function showTOSOverlay(show){
-  if(show){
-    tosOverlay.style.display='flex';
-    document.body.style.overflow='hidden';
-    headerLogoContainer.classList.remove('visible');
-    appContent.setAttribute('aria-hidden','true');
-  } else {
-    tosOverlay.style.display='none';
-    document.body.style.overflow='';
-    headerLogoContainer.classList.add('visible');
-    appContent.setAttribute('aria-hidden','false');
-  }
+// --- TOS ---
+const tosOverlay=document.getElementById('tosOverlay');
+const mainApp=document.getElementById('mainApp');
+const acceptTOS=document.getElementById('acceptTOS');
+if(localStorage.getItem('veltraTOSAccepted')==='true')showMain();else showTOS();
+function showTOS(){tosOverlay.classList.add('showOverlay');}
+function showMain(){tosOverlay.classList.remove('showOverlay');mainApp.style.display='block';document.getElementById('headerLogoContainer').classList.add('visible');}
+acceptTOS.onclick=()=>{localStorage.setItem('veltraTOSAccepted','true');showMain();};
+
+// --- Fetch bookmarks ---
+const grid=document.getElementById('grid');
+const placeholder=document.getElementById('placeholder');
+const catChips=document.getElementById('catChips');
+const activeCount=document.getElementById('activeCount');
+const search=document.getElementById('search');
+const toast=document.getElementById('toast');
+const toastText=document.getElementById('toastText');
+
+let data=[];let selected=new Set();
+
+async function load(){
+  const snap=await get(ref(db,'bookmarks'));
+  if(snap.exists()){data=Object.entries(snap.val()).map(([id,v])=>({id,...v}));renderCats();render();}
 }
-acceptTOS.addEventListener('click',()=>{
-  localStorage.setItem('veltraTOSAccepted','true');
-  showTOSOverlay(false);
-});
-
-// ---------- Bookmarks ----------
-const grid = document.getElementById('grid');
-const placeholder = document.getElementById('placeholder');
-const catChipsContainer = document.getElementById('catChips');
-const activeCountEl = document.getElementById('activeCount');
-const clearCatsBtn = document.getElementById('clearCats');
-const searchInput = document.getElementById('search');
-const toast = document.getElementById('toast');
-const toastText = document.getElementById('toastText');
-
-let bookmarksData = [];
-let selectedCategories = new Set();
-
-async function fetchBookmarks(){
-  const snap = await get(ref(db,'bookmarks'));
-  if(snap.exists()){
-    bookmarksData = Object.entries(snap.val()).map(([id,data])=>({id,...data}));
-    renderCategories();
-    renderGrid();
-  } else {
-    bookmarksData = [];
-    renderGrid();
-  }
-}
-
-function renderCategories(){
-  const allCats = new Set();
-  bookmarksData.forEach(b=>{ if(b.category) allCats.add(b.category); });
-  catChipsContainer.innerHTML='';
-  allCats.forEach(cat=>{
-    const chip = document.createElement('div');
-    chip.className='cat-chip';
-    chip.textContent = cat;
-    chip.addEventListener('click',()=>{ toggleCategory(cat,chip); });
-    catChipsContainer.appendChild(chip);
+function renderCats(){
+  const cats=new Set();
+  data.forEach(b=>b.categories&&Object.keys(b.categories).forEach(c=>cats.add(c)));
+  catChips.innerHTML='';
+  cats.forEach(c=>{
+    const chip=document.createElement('div');
+    chip.className='cat-chip';chip.textContent=c;
+    chip.onclick=()=>{if(selected.has(c))selected.delete(c);else selected.add(c);render();updateCount();chip.classList.toggle('selected');};
+    catChips.appendChild(chip);
   });
 }
-
-function toggleCategory(cat, chipEl){
-  if(selectedCategories.has(cat)){
-    selectedCategories.delete(cat);
-    chipEl.classList.remove('selected');
-  } else {
-    selectedCategories.add(cat);
-    chipEl.classList.add('selected');
-  }
-  updateActiveCount();
-  renderGrid();
-}
-
-function updateActiveCount(){
-  activeCountEl.textContent = selectedCategories.size ? Array.from(selectedCategories).join(', ') : 'All';
-}
-
-function renderGrid(){
+function updateCount(){activeCount.textContent=selected.size?Array.from(selected).join(', '):'All';}
+function render(){
   grid.innerHTML='';
-  const searchTerm = searchInput.value.toLowerCase();
-  const filtered = bookmarksData.filter(b=>{
-    const matchesCategory = selectedCategories.size===0 || selectedCategories.has(b.category);
-    const matchesSearch = b.title.toLowerCase().includes(searchTerm) || (b.desc && b.desc.toLowerCase().includes(searchTerm));
-    return matchesCategory && matchesSearch;
+  const term=search.value.toLowerCase();
+  const filtered=data.filter(b=>{
+    const cat=selected.size===0||Object.keys(b.categories||{}).some(k=>selected.has(k));
+    const text=b.title.toLowerCase().includes(term)||(b.desc||'').toLowerCase().includes(term);
+    return cat&&text;
   });
-
-  if(filtered.length===0){ placeholder.style.display='block'; return; } else { placeholder.style.display='none'; }
-
+  if(!filtered.length){placeholder.style.display='block';return;}else placeholder.style.display='none';
   filtered.forEach(b=>{
-    const card = document.createElement('div'); 
-    card.className='card';
-    card.innerHTML = `
-      <div class="card-head">
-        <div class="titleSmall">${b.title}</div>
-        ${b.category ? `<div class="catTag">${b.category}</div>` : ''}
-      </div>
+    const el=document.createElement('div');
+    el.className='card';
+    el.innerHTML=`<div class="card-head"><div class="titleSmall">${b.title}</div><div class="catTag">${Object.keys(b.categories||{}).join(', ')}</div></div>
       <div class="desc">${b.desc||''}</div>
-      <div class="actions">
-        <div class="copy-square" title="Copy bookmarklet">
-          <img src="https://cdn-icons-png.flaticon.com/512/60/60752.png" alt="Copy">
-        </div>
-      </div>
-    `;
-    card.querySelector('.copy-square').addEventListener('click',()=>copyBookmark(b.code||''));
-    grid.appendChild(card);
+      <div class="actions"><div class="copy-square"><img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/main/pngtree-vector-copy-icon-png-image_4162801.jpg"></div></div>`;
+    el.querySelector('.copy-square').onclick=()=>copyCode(b.code);
+    grid.appendChild(el);
   });
 }
-
-function copyBookmark(code){
+function copyCode(code){
   navigator.clipboard.writeText(code).then(()=>{
-    toastText.textContent='Copied!';
-    toast.classList.add('show');
-    setTimeout(()=>toast.classList.remove('show'),1500);
+    toastText.innerHTML=`✅ Copied — check our <span id="toastLink" style="text-decoration:underline;cursor:pointer;">Instructions</span>`;
+    toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),3000);
+    document.getElementById('toastLink').onclick=()=>openInstructions();
   });
 }
+search.oninput=render;
+document.getElementById('clearCats').onclick=()=>{selected.clear();updateCount();document.querySelectorAll('.cat-chip').forEach(c=>c.classList.remove('selected'));render();}
+load();
 
-searchInput.addEventListener('input', renderGrid);
-clearCatsBtn.addEventListener('click', ()=>{
-  selectedCategories.clear();
-  document.querySelectorAll('.cat-chip.selected').forEach(el=>el.classList.remove('selected'));
-  updateActiveCount();
-  renderGrid();
-});
-
-(async()=>{ await fetchBookmarks(); })();
-
-// ---------- Instructions overlay ----------
-const instructionsOverlay = document.getElementById('instructionsOverlay');
-const instructionsBtn = document.getElementById('instructionsBtn');
-const closeInstructions = document.getElementById('closeInstructions');
-instructionsBtn.addEventListener('click',()=>instructionsOverlay.classList.add('show'));
-closeInstructions.addEventListener('click',()=>instructionsOverlay.classList.remove('show'));
-
-// ---------- Admin overlay ----------
-const lockBtn = document.getElementById('lockBtn');
-const adminOverlay = document.getElementById('adminOverlay');
-const adminLoginBtn = document.getElementById('adminLoginBtn');
-lockBtn.addEventListener('click',()=>adminOverlay.classList.add('show'));
-adminLoginBtn.addEventListener('click',()=>{
-  const pass = document.getElementById('adminPass').value;
-  if(pass==='YOUR_ADMIN_PASSWORD'){
-    alert('Admin access granted');
-    adminOverlay.classList.remove('show');
-  } else { alert('Incorrect password'); }
-});
+// --- Instructions overlay ---
+const instructions=document.getElementById('instructionsOverlay');
+const openBtn=document.getElementById('instructionsBtn');
+const closeBtn=document.getElementById('closeInstructions');
+function openInstructions(){instructions.classList.add('showOverlay');}
+function closeInstructionsF(){instructions.classList.remove('showOverlay');}
+openBtn.onclick=openInstructions;
+closeBtn.onclick=closeInstructionsF;
 </script>
 </body>
 </html>
