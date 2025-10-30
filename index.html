@@ -9,22 +9,21 @@
   --bg:#000; --text:#fff; --muted:rgba(255,255,255,0.65);
   --border:rgba(255,255,255,0.12); --glow:rgba(255,255,255,0.12);
   --card-bg:rgba(255,255,255,0.02);
-  --accent:#9be6a7; --popular:#f9d342;
+  --accent:#9be6a7;
 }
-*{box-sizing:border-box}
+*{box-sizing:border-box;}
 html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Arial,sans-serif;}
-a{color:var(--text);text-decoration:underline;cursor:pointer;}
+a{color:var(--text);text-decoration:none;cursor:pointer;}
 .container{max-width:1100px;margin:18px auto;padding:14px;}
 .header{display:flex;align-items:center;gap:12px;padding:8px 0;position:relative;z-index:2;}
-.logo{width:48px;height:48px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .8s ease;}
-.logo.visible{opacity:1;}
+.logo{width:48px;height:48px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;opacity:1;}
 .logo img{width:100%;height:100%;object-fit:contain;}
-.title{font-size:20px;font-weight:600;}
+.title{font-size:20px;font-weight:600;display:flex;align-items:center;gap:8px;}
 .tag{color:var(--muted);font-size:13px;margin-top:2px;}
 .controls{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
-.search,.btn{background:transparent;border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;}
+.search{background:transparent;border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;flex:1;min-width:160px;}
 .search::placeholder{color:var(--muted);}
-.search:focus,.btn:focus{outline:none;box-shadow:0 0 8px var(--glow);}
+.search:focus{outline:none;box-shadow:0 0 8px var(--glow);}
 .top-controls{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:10px;flex-wrap:wrap;}
 .filter-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
 .small{font-size:13px;color:var(--muted);}
@@ -32,15 +31,13 @@ a{color:var(--text);text-decoration:underline;cursor:pointer;}
 .cat-chip{padding:6px 10px;border-radius:999px;border:1px solid var(--border);cursor:pointer;background:transparent;color:var(--text);font-size:13px;}
 .cat-chip.selected{box-shadow:0 0 8px var(--glow);transform:translateY(-2px);border-color:var(--accent);}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-top:14px;}
-.card{border:1px solid var(--border);padding:12px;border-radius:10px;background:var(--card-bg);transition: transform .18s ease, box-shadow .18s ease;position:relative;}
+.card{border:1px solid var(--border);padding:12px;border-radius:10px;background:var(--card-bg);transition: transform .18s ease, box-shadow .18s ease;}
 .card:hover{transform: translateY(-6px) scale(1.01);box-shadow:0 10px 30px var(--glow);}
 .card-head{display:flex;justify-content:space-between;align-items:center;gap:8px;}
 .titleSmall{font-weight:600;}
 .catTag{font-size:12px;padding:6px;border-radius:8px;border:1px solid var(--border);color:var(--text);background:transparent;}
-.badge{font-size:11px;padding:2px 6px;border-radius:6px;background:var(--accent);color:#000;margin-left:4px;}
-.badge.popular{background:var(--popular);color:#000;}
 .desc{color:var(--muted);font-size:13px;margin:8px 0;min-height:38px;}
-.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.actions{display:flex;gap:8px;align-items:center;}
 .copy-square{width:44px;height:44px;border-radius:8px;border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:transparent;color:var(--text);}
 .copy-square img{width:22px;height:22px;object-fit:contain;}
 .copy-square:hover{box-shadow:0 0 10px var(--glow);transform:translateY(-2px);}
@@ -48,166 +45,159 @@ a{color:var(--text);text-decoration:underline;cursor:pointer;}
 .credit-link:hover{color:var(--text);box-shadow:0 0 8px var(--glow);}
 .toast{position:fixed;left:50%;transform:translateX(-50%);top:14px;padding:12px 18px;border-radius:999px;background:#0b0b0b;color:#fff;box-shadow:0 10px 30px rgba(255,255,255,0.06);z-index:999;opacity:0;pointer-events:none;transition:opacity 0.3s;}
 .toast.show{opacity:1;pointer-events:auto;}
-@media (max-width:700px){
-  .grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;}
-}
+.placeholder{text-align:center;padding:40px;color:var(--muted);grid-column:1/-1;border-radius:12px;border:1px solid rgba(255,255,255,0.02);}
+@media (max-width:700px){.grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;}}
 </style>
 </head>
 <body>
+
 <div class="container" id="mainApp">
   <div class="header">
-    <div class="logo" id="headerLogoContainer"><img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/main/black-and-white-geometric-logos-1%20(1).png" alt="Veltra Logo"></div>
+    <div class="logo"><img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/c592acfc709eafffe9fb70dee3afb600f55f95ff/black-and-white-geometric-logos-1%20(1).png" alt="Veltra Logo"></div>
     <div>
       <div class="title">Veltra</div>
       <div class="tag">Bookmarks & bookmarklets — clean & quick</div>
     </div>
     <div class="controls">
-      <input id="search" class="search" placeholder="Search... (press Enter)">
+      <input id="search" class="search" placeholder="Search...">
     </div>
   </div>
+
   <div class="top-controls">
     <div class="filter-row">
       <div class="small">Filter categories:</div>
       <div id="catChips" class="cat-chips"></div>
     </div>
-    <div class="controls-row">
-      <div class="small">Selected: <span id="activeCount">All</span></div>
-      <button id="clearCats" class="btn">Clear</button>
-    </div>
   </div>
+
   <div id="grid" class="grid"></div>
+  <div id="placeholder" class="placeholder" style="display:none">No bookmarks match. Try another filter.</div>
 </div>
 
-<!-- Toast -->
-<div id="toast" class="toast" role="status" aria-live="polite"><span id="toastText"></span></div>
+<div id="toast" class="toast"><span id="toastText"></span></div>
 
-<!-- Firebase + app script -->
 <script type="module">
 import { app, db } from './firebase-config.js';
 import { ref, get } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 
-/* ELEMENTS */
+/* Elements */
 const grid = document.getElementById('grid');
+const placeholder = document.getElementById('placeholder');
 const catChips = document.getElementById('catChips');
-const activeCount = document.getElementById('activeCount');
 const searchInput = document.getElementById('search');
-const clearCatsBtn = document.getElementById('clearCats');
 const toast = document.getElementById('toast');
 const toastText = document.getElementById('toastText');
 
 let bookmarks = [];
 let selectedCategories = new Set();
 
+/* Toast helper */
+function showToast(msg){
+  toastText.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(()=> toast.classList.remove('show'), 2500);
+}
+
+/* Load bookmarks */
 async function loadBookmarks(){
   try{
     const snap = await get(ref(db,'bookmarks'));
     bookmarks = [];
     if(snap.exists()){
       const raw = snap.val();
-      bookmarks = Object.entries(raw).map(([id,data])=>({id,...data}));
+      bookmarks = Object.entries(raw).map(([id, data]) => ({ id, ...(data||{}) }));
     }
     renderCategories();
     renderGrid();
   }catch(e){
-    console.error('Failed to load bookmarks', e);
+    console.error(e);
     bookmarks = [];
     renderCategories();
     renderGrid();
   }
 }
 
+/* Categories */
 function renderCategories(){
   const all = new Set();
   bookmarks.forEach(b=>{
-    if(b.categories){
-      Object.values(b.categories).forEach(c=>{
-        if(typeof c==='string') all.add(c);
-        else if(c.name) all.add(c.name);
-      });
-    }
+    if(b.categories) Object.values(b.categories).forEach(c=>{
+      if(c?.name) all.add(c.name);
+      else if(typeof c==='string') all.add(c);
+    });
   });
   catChips.innerHTML='';
-  if(all.size===0){ catChips.innerHTML='<div class="small">No categories found</div>'; return; }
   all.forEach(cat=>{
-    const chip = document.createElement('div');
-    chip.className='cat-chip';
-    chip.textContent=cat;
-    chip.addEventListener('click',()=>{
+    const chip=document.createElement('div'); chip.className='cat-chip'; chip.textContent=cat;
+    chip.addEventListener('click', ()=>{
       if(selectedCategories.has(cat)){ selectedCategories.delete(cat); chip.classList.remove('selected'); }
-      else{ selectedCategories.add(cat); chip.classList.add('selected'); }
-      updateActiveCount(); renderGrid();
+      else { selectedCategories.add(cat); chip.classList.add('selected'); }
+      renderGrid();
     });
     catChips.appendChild(chip);
   });
 }
 
-function updateActiveCount(){ activeCount.textContent = selectedCategories.size ? Array.from(selectedCategories).join(', ') : 'All'; }
-
+/* Grid rendering */
 function renderGrid(){
   grid.innerHTML='';
-  const q=(searchInput.value||'').toLowerCase();
+  const q = (searchInput.value||'').toLowerCase();
   const filtered = bookmarks.filter(b=>{
     const hasCat = selectedCategories.size===0 || (b.categories && Object.values(b.categories).some(c=>{
-      const name=(typeof c==='string')?c:c?.name;
+      const name = c?.name || (typeof c==='string'?c:null);
       return name && selectedCategories.has(name);
     }));
     const title = (b.title||'').toLowerCase();
     const desc = (b.desc||'').toLowerCase();
-    return hasCat && (title.includes(q) || desc.includes(q));
+    return hasCat && (title.includes(q)||desc.includes(q));
   });
 
-  if(filtered.length===0){ grid.innerHTML='<div class="small" style="grid-column:1/-1;text-align:center;">No bookmarks match. Try another filter.</div>'; return; }
+  if(filtered.length===0){ placeholder.style.display='block'; return; } else { placeholder.style.display='none'; }
 
   filtered.forEach(b=>{
-    const card = document.createElement('div'); card.className='card';
-    let cats=[];
-    if(b.categories) cats=Object.values(b.categories).map(c=>(typeof c==='string')?c:c?.name).filter(Boolean);
+    const card=document.createElement('div'); card.className='card';
 
-    // card head
     const head=document.createElement('div'); head.className='card-head';
-    const titleEl=document.createElement('div'); titleEl.className='titleSmall'; titleEl.textContent=b.title||'Untitled';
-    head.appendChild(titleEl);
+    const title=document.createElement('div'); title.className='titleSmall'; title.textContent=b.title||'Untitled';
+    head.appendChild(title);
 
-    // badges
-    if(b.featured) { const badge=document.createElement('span'); badge.className='badge'; badge.textContent='Featured'; head.appendChild(badge); }
-    if(b.popularity && b.popularity>=50){ const badge=document.createElement('span'); badge.className='badge popular'; badge.textContent='Popular'; head.appendChild(badge); }
-
+    const cats = [];
+    if(b.categories) Object.values(b.categories).forEach(c=>{
+      const n=c?.name|| (typeof c==='string'?c:null);
+      if(n) cats.push(n);
+    });
     if(cats.length){ const tag=document.createElement('div'); tag.className='catTag'; tag.textContent=cats.join(', '); head.appendChild(tag); }
     card.appendChild(head);
 
-    // description
     const desc=document.createElement('div'); desc.className='desc'; desc.textContent=b.desc||''; card.appendChild(desc);
 
-    // actions
     const actions=document.createElement('div'); actions.className='actions';
-    // copy button
+
     const copy=document.createElement('div'); copy.className='copy-square';
-    const img=document.createElement('img'); img.src='https://raw.githubusercontent.com/mojhehh/Ihateschool/0942beebdb01d6190cc9d1daf61e11a77c6b3a64/pngtree-vector-copy-icon-png-image_4162801.jpg';
-    img.alt='Copy'; copy.appendChild(img);
-    copy.addEventListener('click',()=>copyBookmark(b.code||''));
+    const img=document.createElement('img'); img.src='https://raw.githubusercontent.com/mojhehh/Ihateschool/0942beebdb01d6190cc9d1daf61e11a77c6b3a64/pngtree-vector-copy-icon-png-image_4162801.jpg'; img.alt='Copy';
+    copy.appendChild(img);
+    copy.addEventListener('click', ()=>{
+      navigator.clipboard.writeText(b.code||'').then(()=>showToast('Copied bookmarklet!'));
+    });
+
     actions.appendChild(copy);
 
-    // credits link (if exists)
-    if(b.creditsLink){ const cred=document.createElement('a'); cred.className='credit-link'; cred.href=b.creditsLink; cred.target='_blank'; cred.rel='noopener'; cred.textContent='Credits'; actions.appendChild(cred); }
+    if(b.creditsLink){
+      const credits=document.createElement('a'); credits.className='credit-link'; credits.href=b.creditsLink; credits.target='_blank'; credits.textContent='Credits';
+      actions.appendChild(credits);
+    }
 
     card.appendChild(actions);
     grid.appendChild(card);
   });
 }
 
-/* copy + toast */
-function copyBookmark(code){
-  navigator.clipboard.writeText(code||'').then(()=>{
-    toastText.innerHTML='✅ Code copied!';
-    toast.classList.add('show');
-    setTimeout(()=>toast.classList.remove('show'),3000);
-  }).catch(()=>{ toastText.textContent='Copy failed'; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2000); });
-}
-
+/* Events */
 searchInput.addEventListener('input', renderGrid);
-clearCatsBtn.addEventListener('click',()=>{ selectedCategories.clear(); document.querySelectorAll('.cat-chip.selected').forEach(c=>c.classList.remove('selected')); updateActiveCount(); renderGrid(); });
 
+/* Init */
 loadBookmarks();
 </script>
+
 </body>
 </html>
