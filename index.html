@@ -11,24 +11,26 @@
   --card-bg:rgba(255,255,255,0.02);
   --accent:#9be6a7;
 }
-*{box-sizing:border-box;}
+*{box-sizing:border-box}
 html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Arial,sans-serif;}
-a{color:var(--text);text-decoration:none;cursor:pointer;}
+a{color:var(--text);text-decoration:underline;cursor:pointer;}
 .container{max-width:1100px;margin:18px auto;padding:14px;}
 .header{display:flex;align-items:center;gap:12px;padding:8px 0;position:relative;z-index:2;}
-.logo{width:48px;height:48px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;opacity:1;}
+.logo{width:48px;height:48px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .8s ease;}
+.logo.visible{opacity:1;}
 .logo img{width:100%;height:100%;object-fit:contain;}
-.title{font-size:20px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.title-container{display:flex;align-items:center;gap:6px;}
+.title{font-size:20px;font-weight:600;}
 .tag{color:var(--muted);font-size:13px;margin-top:2px;}
 .controls{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
-.search{background:transparent;border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;flex:1;min-width:160px;}
+.search,.btn{background:transparent;border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;}
 .search::placeholder{color:var(--muted);}
-.search:focus{outline:none;box-shadow:0 0 8px var(--glow);}
+.search:focus,.btn:focus{outline:none;box-shadow:0 0 8px var(--glow);}
 .top-controls{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:10px;flex-wrap:wrap;}
 .filter-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
 .small{font-size:13px;color:var(--muted);}
 .cat-chips{display:flex;gap:8px;flex-wrap:wrap;}
-.cat-chip{padding:6px 10px;border-radius:999px;border:1px solid var(--border);cursor:pointer;background:transparent;color:var(--text);font-size:13px;}
+.cat-chip{padding:6px 10px;border-radius:999px;border:1px solid var(--border);cursor:pointer;background:transparent;color:var(--text);font-size:13px;transition:0.2s;}
 .cat-chip.selected{box-shadow:0 0 8px var(--glow);transform:translateY(-2px);border-color:var(--accent);}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-top:14px;}
 .card{border:1px solid var(--border);padding:12px;border-radius:10px;background:var(--card-bg);transition: transform .18s ease, box-shadow .18s ease;}
@@ -37,7 +39,7 @@ a{color:var(--text);text-decoration:none;cursor:pointer;}
 .titleSmall{font-weight:600;}
 .catTag{font-size:12px;padding:6px;border-radius:8px;border:1px solid var(--border);color:var(--text);background:transparent;}
 .desc{color:var(--muted);font-size:13px;margin:8px 0;min-height:38px;}
-.actions{display:flex;gap:8px;align-items:center;}
+.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
 .copy-square{width:44px;height:44px;border-radius:8px;border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:transparent;color:var(--text);}
 .copy-square img{width:22px;height:22px;object-fit:contain;}
 .copy-square:hover{box-shadow:0 0 10px var(--glow);transform:translateY(-2px);}
@@ -45,21 +47,52 @@ a{color:var(--text);text-decoration:none;cursor:pointer;}
 .credit-link:hover{color:var(--text);box-shadow:0 0 8px var(--glow);}
 .toast{position:fixed;left:50%;transform:translateX(-50%);top:14px;padding:12px 18px;border-radius:999px;background:#0b0b0b;color:#fff;box-shadow:0 10px 30px rgba(255,255,255,0.06);z-index:999;opacity:0;pointer-events:none;transition:opacity 0.3s;}
 .toast.show{opacity:1;pointer-events:auto;}
+#instructionsOverlay,#tosOverlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.96);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2000;padding:24px;overflow:auto;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.showOverlay{opacity:1;pointer-events:auto;}
+.overlay-content{max-width:900px;text-align:left;font-size:16px;line-height:1.45;color:var(--text);}
+.backBtn{margin-top:18px;padding:10px 16px;font-size:15px;border:1px solid var(--border);background:transparent;color:#fff;border-radius:8px;cursor:pointer;}
 .placeholder{text-align:center;padding:40px;color:var(--muted);grid-column:1/-1;border-radius:12px;border:1px solid rgba(255,255,255,0.02);}
-@media (max-width:700px){.grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;}}
+@media (max-width:700px){.overlay-content{padding:12px;font-size:15px;}.grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;}}
 </style>
 </head>
 <body>
 
-<div class="container" id="mainApp">
+<!-- TOS overlay -->
+<div id="tosOverlay" aria-modal="true" role="dialog">
+  <div class="overlay-content">
+    <h2>Veltra — Terms of Service & Privacy Policy</h2>
+    <p><strong>Last updated: October 29, 2025</strong></p>
+    <p>By using Veltra, you agree to our Terms. Educational purposes only. Use all materials at your own risk.</p>
+    <div style="text-align:center"><button id="acceptTOS" class="backBtn">I Accept</button></div>
+  </div>
+</div>
+
+<!-- Instructions overlay -->
+<div id="instructionsOverlay" aria-modal="true" role="dialog">
+  <div class="overlay-content">
+    <h2>How to add a Veltra bookmarklet (Safari)</h2>
+    <ol>
+      <li>Copy the bookmarklet code using the Copy button.</li>
+      <li>Open Safari and show the Favorites / Bookmarks Bar.</li>
+      <li>Add a bookmark (Share → Add Bookmark).</li>
+      <li>Edit the bookmark and paste the code into the URL field.</li>
+      <li>Click the bookmark to use it.</li>
+    </ol>
+    <div style="text-align:center"><button id="closeInstructions" class="backBtn">Back</button></div>
+  </div>
+</div>
+
+<!-- Main App -->
+<div class="container" id="mainApp" aria-hidden="true">
   <div class="header">
-    <div class="logo"><img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/c592acfc709eafffe9fb70dee3afb600f55f95ff/black-and-white-geometric-logos-1%20(1).png" alt="Veltra Logo"></div>
-    <div>
+    <div class="logo" id="headerLogoContainer"><img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/c592acfc709eafffe9fb70dee3afb600f55f95ff/black-and-white-geometric-logos-1%20(1).png" alt="Veltra Logo"></div>
+    <div class="title-container">
       <div class="title">Veltra</div>
       <div class="tag">Bookmarks & bookmarklets — clean & quick</div>
     </div>
     <div class="controls">
       <input id="search" class="search" placeholder="Search...">
+      <button id="instructionsBtn" class="btn">Instructions</button>
     </div>
   </div>
 
@@ -68,136 +101,178 @@ a{color:var(--text);text-decoration:none;cursor:pointer;}
       <div class="small">Filter categories:</div>
       <div id="catChips" class="cat-chips"></div>
     </div>
+    <div class="controls-row">
+      <div class="small">Selected: <span id="activeCount">All</span></div>
+      <button id="clearCats" class="btn">Clear</button>
+    </div>
   </div>
 
   <div id="grid" class="grid"></div>
-  <div id="placeholder" class="placeholder" style="display:none">No bookmarks match. Try another filter.</div>
 </div>
 
-<div id="toast" class="toast"><span id="toastText"></span></div>
+<!-- Toast -->
+<div id="toast" class="toast" role="status" aria-live="polite"><span id="toastText"></span></div>
 
 <script type="module">
-import { app, db } from './firebase-config.js';
-import { ref, get } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 
-/* Elements */
+// --- Firebase config ---
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// --- DOM ---
+const tosOverlay = document.getElementById('tosOverlay');
+const acceptTOS = document.getElementById('acceptTOS');
+const mainApp = document.getElementById('mainApp');
+const headerLogoContainer = document.getElementById('headerLogoContainer');
+const instructionsOverlay = document.getElementById('instructionsOverlay');
+const instructionsBtn = document.getElementById('instructionsBtn');
+const closeInstructions = document.getElementById('closeInstructions');
 const grid = document.getElementById('grid');
-const placeholder = document.getElementById('placeholder');
 const catChips = document.getElementById('catChips');
+const activeCount = document.getElementById('activeCount');
 const searchInput = document.getElementById('search');
+const clearCatsBtn = document.getElementById('clearCats');
 const toast = document.getElementById('toast');
 const toastText = document.getElementById('toastText');
 
 let bookmarks = [];
 let selectedCategories = new Set();
 
-/* Toast helper */
-function showToast(msg){
-  toastText.textContent = msg;
-  toast.classList.add('show');
-  setTimeout(()=> toast.classList.remove('show'), 2500);
-}
+// --- Overlay logic ---
+function showOverlay(el){ el.classList.add('showOverlay'); }
+function hideOverlay(el){ el.classList.remove('showOverlay'); }
+if(localStorage.getItem('veltraTOSAccepted')==='true'){ showMainUI(); } 
+else{ showOverlay(tosOverlay); mainApp.setAttribute('aria-hidden','true'); }
 
-/* Load bookmarks */
+acceptTOS.addEventListener('click',()=>{
+  localStorage.setItem('veltraTOSAccepted','true');
+  hideOverlay(tosOverlay);
+  showMainUI();
+});
+function showMainUI(){
+  hideOverlay(tosOverlay);
+  mainApp.style.display='block';
+  mainApp.removeAttribute('aria-hidden');
+  headerLogoContainer.classList.add('visible');
+}
+instructionsBtn.addEventListener('click',()=>showOverlay(instructionsOverlay));
+closeInstructions.addEventListener('click',()=>hideOverlay(instructionsOverlay));
+clearCatsBtn.addEventListener('click',()=>{
+  selectedCategories.clear();
+  document.querySelectorAll('.cat-chip.selected').forEach(c=>c.classList.remove('selected'));
+  updateActiveCount();
+  renderGrid();
+});
+searchInput.addEventListener('input',renderGrid);
+function updateActiveCount(){ activeCount.textContent = selectedCategories.size ? Array.from(selectedCategories).join(', ') : 'All'; }
+
+// --- Load bookmarks ---
 async function loadBookmarks(){
   try{
     const snap = await get(ref(db,'bookmarks'));
     bookmarks = [];
     if(snap.exists()){
       const raw = snap.val();
-      bookmarks = Object.entries(raw).map(([id, data]) => ({ id, ...(data||{}) }));
+      bookmarks = Object.entries(raw).map(([id,data])=>({ id, ...(data||{}) }));
     }
     renderCategories();
     renderGrid();
-  }catch(e){
-    console.error(e);
-    bookmarks = [];
-    renderCategories();
-    renderGrid();
-  }
+  }catch(e){ console.error('Failed to load bookmarks',e); }
 }
 
-/* Categories */
+// --- Render categories ---
 function renderCategories(){
   const all = new Set();
   bookmarks.forEach(b=>{
-    if(b.categories) Object.values(b.categories).forEach(c=>{
-      if(c?.name) all.add(c.name);
-      else if(typeof c==='string') all.add(c);
-    });
+    if(b.categories && typeof b.categories==='object'){
+      Object.values(b.categories).forEach(c=>{
+        const name = c && c.name ? c.name : (typeof c==='string'?c:null);
+        if(name) all.add(name);
+      });
+    }
   });
   catChips.innerHTML='';
   all.forEach(cat=>{
     const chip=document.createElement('div'); chip.className='cat-chip'; chip.textContent=cat;
-    chip.addEventListener('click', ()=>{
+    chip.addEventListener('click',()=>{
       if(selectedCategories.has(cat)){ selectedCategories.delete(cat); chip.classList.remove('selected'); }
-      else { selectedCategories.add(cat); chip.classList.add('selected'); }
-      renderGrid();
+      else{ selectedCategories.add(cat); chip.classList.add('selected'); }
+      updateActiveCount(); renderGrid();
     });
     catChips.appendChild(chip);
   });
 }
 
-/* Grid rendering */
+// --- Render grid ---
 function renderGrid(){
   grid.innerHTML='';
   const q = (searchInput.value||'').toLowerCase();
   const filtered = bookmarks.filter(b=>{
     const hasCat = selectedCategories.size===0 || (b.categories && Object.values(b.categories).some(c=>{
-      const name = c?.name || (typeof c==='string'?c:null);
+      const name = (c && c.name) ? c.name : (typeof c==='string'?c:null);
       return name && selectedCategories.has(name);
     }));
     const title = (b.title||'').toLowerCase();
     const desc = (b.desc||'').toLowerCase();
-    return hasCat && (title.includes(q)||desc.includes(q));
+    return hasCat && (title.includes(q) || desc.includes(q));
   });
-
-  if(filtered.length===0){ placeholder.style.display='block'; return; } else { placeholder.style.display='none'; }
+  if(filtered.length===0){ grid.innerHTML='<div class="placeholder">No bookmarks match. Try another filter.</div>'; return; }
 
   filtered.forEach(b=>{
     const card=document.createElement('div'); card.className='card';
-
+    let cats=[]; if(b.categories && typeof b.categories==='object'){ cats=Object.values(b.categories).map(c=>c && c.name?c.name:(typeof c==='string'?c:null)).filter(Boolean); }
     const head=document.createElement('div'); head.className='card-head';
     const title=document.createElement('div'); title.className='titleSmall'; title.textContent=b.title||'Untitled';
     head.appendChild(title);
-
-    const cats = [];
-    if(b.categories) Object.values(b.categories).forEach(c=>{
-      const n=c?.name|| (typeof c==='string'?c:null);
-      if(n) cats.push(n);
-    });
     if(cats.length){ const tag=document.createElement('div'); tag.className='catTag'; tag.textContent=cats.join(', '); head.appendChild(tag); }
     card.appendChild(head);
-
     const desc=document.createElement('div'); desc.className='desc'; desc.textContent=b.desc||''; card.appendChild(desc);
 
     const actions=document.createElement('div'); actions.className='actions';
-
     const copy=document.createElement('div'); copy.className='copy-square';
-    const img=document.createElement('img'); img.src='https://raw.githubusercontent.com/mojhehh/Ihateschool/0942beebdb01d6190cc9d1daf61e11a77c6b3a64/pngtree-vector-copy-icon-png-image_4162801.jpg'; img.alt='Copy';
-    copy.appendChild(img);
-    copy.addEventListener('click', ()=>{
-      navigator.clipboard.writeText(b.code||'').then(()=>showToast('Copied bookmarklet!'));
-    });
-
-    actions.appendChild(copy);
-
+    const img=document.createElement('img'); img.src='https://raw.githubusercontent.com/mojhehh/Ihateschool/0942beebdb01d6190cc9d1daf61e11a77c6b3a64/pngtree-vector-copy-icon-png-image_4162801.jpg'; img.alt='Copy'; copy.appendChild(img);
+    copy.addEventListener('click',()=>copyBookmark(b.code||''));
     if(b.creditsLink){
-      const credits=document.createElement('a'); credits.className='credit-link'; credits.href=b.creditsLink; credits.target='_blank'; credits.textContent='Credits';
-      actions.appendChild(credits);
+      const creditsEl=document.createElement('a'); creditsEl.className='credit-link';
+      creditsEl.href=b.creditsLink; creditsEl.target='_blank'; creditsEl.rel='noopener';
+      creditsEl.textContent='Credits'; creditsEl.title='Open credits / source';
+      actions.appendChild(creditsEl);
     }
-
-    card.appendChild(actions);
-    grid.appendChild(card);
+    actions.appendChild(copy); card.appendChild(actions); grid.appendChild(card);
   });
 }
 
-/* Events */
-searchInput.addEventListener('input', renderGrid);
+// --- Copy & Toast ---
+function copyBookmark(code){
+  const toCopy = code || '';
+  if(!toCopy) return showToast('No code available for this bookmark.');
+  navigator.clipboard.writeText(toCopy).then(()=>showToast('Copied! Click here for instructions →', true));
+}
+function showToast(msg, link=false){
+  toastText.textContent = msg;
+  toast.classList.add('show');
+  if(link){
+    toast.style.cursor = 'pointer';
+    toast.onclick = () => { hideOverlay(tosOverlay); showOverlay(instructionsOverlay); toast.classList.remove('show'); toast.onclick = null; };
+  } else {
+    toast.style.cursor = 'default'; toast.onclick = null;
+  }
+  setTimeout(()=>{ toast.classList.remove('show'); toast.onclick=null; }, 3000);
+}
 
-/* Init */
+// --- Initialize ---
 loadBookmarks();
 </script>
-
 </body>
 </html>
