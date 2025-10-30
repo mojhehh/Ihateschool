@@ -3,14 +3,16 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Veltra</title>
+<title>Veltra — Bookmark Catalog</title>
 <style>
 :root{
   --bg:#000; --text:#fff; --muted:rgba(255,255,255,0.65);
   --border:rgba(255,255,255,0.12); --glow:rgba(255,255,255,0.12);
   --card-bg:rgba(255,255,255,0.02);
+  --accent:#9be6a7;
 }
-html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--text);font-family:Inter,sans-serif;}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Arial,sans-serif;}
 a{color:var(--text);text-decoration:underline;cursor:pointer;}
 .container{max-width:1100px;margin:18px auto;padding:14px;}
 .header{display:flex;align-items:center;gap:12px;padding:8px 0;position:relative;z-index:2;}
@@ -28,7 +30,7 @@ a{color:var(--text);text-decoration:underline;cursor:pointer;}
 .small{font-size:13px;color:var(--muted);}
 .cat-chips{display:flex;gap:8px;flex-wrap:wrap;}
 .cat-chip{padding:6px 10px;border-radius:999px;border:1px solid var(--border);cursor:pointer;background:transparent;color:var(--text);font-size:13px;}
-.cat-chip.selected{box-shadow:0 0 8px var(--glow);transform:translateY(-2px);}
+.cat-chip.selected{box-shadow:0 0 8px var(--glow);transform:translateY(-2px);border-color:var(--accent);}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-top:14px;}
 .card{border:1px solid var(--border);padding:12px;border-radius:10px;background:var(--card-bg);transition: transform .18s ease, box-shadow .18s ease;}
 .card:hover{transform: translateY(-6px) scale(1.01);box-shadow:0 10px 30px var(--glow);}
@@ -36,48 +38,31 @@ a{color:var(--text);text-decoration:underline;cursor:pointer;}
 .titleSmall{font-weight:600;}
 .catTag{font-size:12px;padding:6px;border-radius:8px;border:1px solid var(--border);color:var(--text);background:transparent;}
 .desc{color:var(--muted);font-size:13px;margin:8px 0;min-height:38px;}
-.actions{display:flex;gap:8px;align-items:center;}
+.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
 .copy-square{width:44px;height:44px;border-radius:8px;border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:transparent;color:var(--text);}
-.copy-square img{width:20px;height:20px;}
+.copy-square img{width:22px;height:22px;object-fit:contain;}
 .copy-square:hover{box-shadow:0 0 10px var(--glow);transform:translateY(-2px);}
-.toast{position:fixed;left:50%;transform:translateX(-50%);top:14px;padding:12px 18px;border-radius:999px;background:#000;color:#fff;box-shadow:0 10px 30px rgba(255,255,255,0.12);z-index:999;opacity:0;pointer-events:none;transition:opacity 0.3s;}
-.toast.show{opacity:1;}
-#lockBtn{position:fixed;top:16px;right:16px;width:40px;height:40px;border-radius:8px;padding:6px;border:1px solid var(--border);background:transparent;cursor:pointer;opacity:0.8;z-index:1000;}
-#lockBtn img{width:100%;height:100%;}
-#instructionsOverlay, #tosOverlay{
-  position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);color:#fff;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  z-index:2000;padding:40px;overflow:auto;opacity:0;pointer-events:none;transition:opacity 0.4s ease;
+.credit-link{font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);text-decoration:underline;}
+.credit-link:hover{color:var(--text);box-shadow:0 0 8px var(--glow);}
+.toast{position:fixed;left:50%;transform:translateX(-50%);top:14px;padding:12px 18px;border-radius:999px;background:#0b0b0b;color:#fff;box-shadow:0 10px 30px rgba(255,255,255,0.06);z-index:999;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.toast.show{opacity:1;pointer-events:auto;}
+@media (max-width:700px){
+  .grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;}
 }
-.showOverlay{opacity:1;pointer-events:auto;}
-.overlay-content{max-width:800px;text-align:left;font-size:18px;}
-.backBtn{margin-top:20px;padding:10px 16px;font-size:16px;border:1px solid var(--border);background:transparent;color:#fff;border-radius:8px;cursor:pointer;}
-.placeholder{text-align:center;padding:40px;color:var(--muted);grid-column:1/-1;border-radius:12px;border:1px solid rgba(255,255,255,0.02);}
 </style>
 </head>
 <body>
 
-<!-- TOS -->
-<div id="tosOverlay">
-  <div class="overlay-content" style="text-align:center">
-    <h2>Veltra — Terms of Service & Privacy Policy</h2>
-    <p>Welcome to Veltra! Before using our site, please read this carefully.</p>
-    <p><strong>We collect minimal data</strong> (like your bookmarks and basic usage info) to make the experience better. By continuing, you agree to our TOS and Privacy Policy.</p>
-    <p>We are not responsible for misuse of bookmarklets or links shared through this site.</p>
-    <button id="acceptTOS" class="backBtn">I Accept</button>
-  </div>
-</div>
-
-<!-- Main UI -->
-<div class="container" id="mainApp" style="display:none;">
+<!-- Main app -->
+<div class="container" id="mainApp">
   <div class="header">
-    <div class="logo" id="headerLogoContainer"><img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/main/black-and-white-geometric-logos-1%20(1).png" alt="Logo"></div>
+    <div class="logo" id="headerLogoContainer"><img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/main/black-and-white-geometric-logos-1%20(1).png" alt="Veltra Logo"></div>
     <div>
       <div class="title">Veltra</div>
       <div class="tag">Bookmarks & bookmarklets — clean & quick</div>
     </div>
     <div class="controls">
-      <input id="search" class="search" placeholder="Search...">
+      <input id="search" class="search" placeholder="Search... (press Enter)">
       <button id="instructionsBtn" class="btn">Instructions</button>
     </div>
   </div>
@@ -93,106 +78,191 @@ a{color:var(--text);text-decoration:underline;cursor:pointer;}
     </div>
   </div>
 
-  <div id="grid" class="grid"></div>
-  <div id="placeholder" class="placeholder" style="display:none;">No bookmarks match.</div>
+  <div id="grid" class="grid" aria-live="polite"></div>
 </div>
 
-<button id="lockBtn"><img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/main/lock-icon-clipart-free-png%20(1).webp"></button>
-<div id="toast" class="toast"><span id="toastText"></span></div>
+<!-- Admin Lock Button -->
+<button id="lockBtn" title="Admin" style="position:fixed;top:16px;right:16px;width:40px;height:40px;border-radius:8px;padding:6px;border:1px solid var(--border);background:transparent;cursor:pointer;opacity:0.95;z-index:1000;">
+  <img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/main/lock-icon-clipart-free-png%20(1).webp" alt="lock" style="width:100%;height:100%;object-fit:contain;">
+</button>
 
-<!-- Instructions -->
-<div id="instructionsOverlay">
-  <div class="overlay-content">
-    <h2>How to Use Veltra Bookmarklets (Safari)</h2>
+<!-- Toast -->
+<div id="toast" class="toast" role="status" aria-live="polite"><span id="toastText"></span></div>
+
+<!-- TOS Overlay -->
+<div id="tosOverlay" aria-modal="true" role="dialog" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.96);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2000;padding:24px;overflow:auto;opacity:0;pointer-events:none;transition:opacity 0.3s;">
+  <div class="overlay-content" style="max-width:900px;text-align:left;font-size:16px;line-height:1.45;color:var(--text);">
+    <h2>Veltra — Terms of Service & Privacy Policy</h2>
+    <p><strong>Last updated: October 29, 2025</strong></p>
+    <p>Welcome to Veltra (“we,” “our,” or “us”). By accessing this website, you agree to our Terms of Service and Privacy Policy. Please read carefully.</p>
     <ol>
-      <li>Open Safari on your Mac or iPad.</li>
-      <li>Click the <strong>Share</strong> button and choose <em>Add Bookmark</em>.</li>
-      <li>Save it in the <strong>Favorites</strong> or <strong>Bookmarks Bar</strong>.</li>
-      <li>After saving, open <strong>Edit Bookmarks</strong> and paste the copied code into the URL field.</li>
-      <li>Now you can click that bookmark anytime to run the code!</li>
+      <li><strong>Educational Use Only</strong> — For learning purposes only.</li>
+      <li><strong>No Responsibility</strong> — Use at your own risk.</li>
+      <li><strong>Redistribution Notice</strong> — We only share public content.</li>
+      <li><strong>User Responsibilities</strong> — Follow applicable laws; no misuse.</li>
+      <li><strong>No Warranty</strong> — Materials are "as is".</li>
+      <li><strong>Intellectual Property</strong> — Respect original creators.</li>
+      <li><strong>Links to Other Websites</strong> — We are not responsible for external sites.</li>
+      <li><strong>Changes to Terms</strong> — Updates may occur anytime.</li>
+      <li><strong>Support</strong> — Use our support page for issues.</li>
     </ol>
+    <div style="text-align:center"><button id="acceptTOS" class="btn" style="margin-top:16px;">I Accept</button></div>
   </div>
-  <button id="closeInstructions" class="backBtn">Back</button>
+</div>
+
+<!-- Admin Overlay -->
+<div id="adminOverlay" aria-modal="true" role="dialog" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.96);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2000;padding:24px;overflow:auto;opacity:0;pointer-events:none;transition:opacity 0.3s;">
+  <div class="overlay-content" style="max-width:500px;text-align:left;">
+    <h2>Admin Login</h2>
+    <input id="adminEmail" placeholder="admin@example.com" style="width:100%;margin-top:12px;padding:8px;border-radius:6px;border:1px solid #444;background:transparent;color:#fff;">
+    <input id="adminPass" type="password" placeholder="password" style="width:100%;margin-top:8px;padding:8px;border-radius:6px;border:1px solid #444;background:transparent;color:#fff;">
+    <div style="margin-top:12px;">
+      <button id="adminLoginBtn" class="btn">Login</button>
+      <button id="closeAdmin" class="btn" style="margin-left:8px;">Close</button>
+    </div>
+    <p id="adminMsg" style="color:var(--muted);margin-top:10px;font-size:14px;"></p>
+  </div>
+</div>
+
+<!-- Instructions Overlay -->
+<div id="instructionsOverlay" aria-modal="true" role="dialog" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.96);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2000;padding:24px;overflow:auto;opacity:0;pointer-events:none;transition:opacity 0.3s;">
+  <div class="overlay-content" style="max-width:900px;text-align:left;font-size:16px;line-height:1.45;color:var(--text);">
+    <h2>How to add a Veltra bookmarklet</h2>
+    <ol>
+      <li>Copy the bookmarklet code using the Copy button.</li>
+      <li>Open your browser and make sure bookmarks bar is visible.</li>
+      <li>Add a new bookmark and paste the code as URL.</li>
+      <li>Click the bookmarklet to use.</li>
+    </ol>
+    <div style="text-align:center"><button id="closeInstructions" class="btn" style="margin-top:16px;">Back</button></div>
+  </div>
 </div>
 
 <script type="module">
-import { app, db } from './firebase-config.js';
+import { app, db, auth } from './firebase-config.js';
 import { ref, get } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
+import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
 
-// --- TOS ---
-const tosOverlay=document.getElementById('tosOverlay');
-const mainApp=document.getElementById('mainApp');
-const acceptTOS=document.getElementById('acceptTOS');
-if(localStorage.getItem('veltraTOSAccepted')==='true')showMain();else showTOS();
-function showTOS(){tosOverlay.classList.add('showOverlay');}
-function showMain(){tosOverlay.classList.remove('showOverlay');mainApp.style.display='block';document.getElementById('headerLogoContainer').classList.add('visible');}
-acceptTOS.onclick=()=>{localStorage.setItem('veltraTOSAccepted','true');showMain();};
+/* Elements */
+const tosOverlay = document.getElementById('tosOverlay');
+const acceptTOS = document.getElementById('acceptTOS');
+const mainApp = document.getElementById('mainApp');
+const headerLogoContainer = document.getElementById('headerLogoContainer');
 
-// --- Fetch bookmarks ---
-const grid=document.getElementById('grid');
-const placeholder=document.getElementById('placeholder');
-const catChips=document.getElementById('catChips');
-const activeCount=document.getElementById('activeCount');
-const search=document.getElementById('search');
-const toast=document.getElementById('toast');
-const toastText=document.getElementById('toastText');
+const adminOverlay = document.getElementById('adminOverlay');
+const lockBtn = document.getElementById('lockBtn');
+const closeAdminBtn = document.getElementById('closeAdmin');
+const adminLoginBtn = document.getElementById('adminLoginBtn');
+const adminEmailInput = document.getElementById('adminEmail');
+const adminPassInput = document.getElementById('adminPass');
+const adminMsg = document.getElementById('adminMsg');
 
-let data=[];let selected=new Set();
+const instructionsOverlay = document.getElementById('instructionsOverlay');
+const instructionsBtn = document.getElementById('instructionsBtn');
+const closeInstructions = document.getElementById('closeInstructions');
 
-async function load(){
-  const snap=await get(ref(db,'bookmarks'));
-  if(snap.exists()){data=Object.entries(snap.val()).map(([id,v])=>({id,...v}));renderCats();render();}
+const grid = document.getElementById('grid');
+const catChipsContainer = document.getElementById('catChips');
+const searchInput = document.getElementById('search');
+const toast = document.getElementById('toast');
+const toastText = document.getElementById('toastText');
+
+/* Show Logo Animation */
+setTimeout(()=>{headerLogoContainer.classList.add('visible')},100);
+
+/* Toast helper */
+function showToast(msg){
+  toastText.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'),2000);
 }
-function renderCats(){
-  const cats=new Set();
-  data.forEach(b=>b.categories&&Object.keys(b.categories).forEach(c=>cats.add(c)));
-  catChips.innerHTML='';
-  cats.forEach(c=>{
-    const chip=document.createElement('div');
-    chip.className='cat-chip';chip.textContent=c;
-    chip.onclick=()=>{if(selected.has(c))selected.delete(c);else selected.add(c);render();updateCount();chip.classList.toggle('selected');};
-    catChips.appendChild(chip);
-  });
-}
-function updateCount(){activeCount.textContent=selected.size?Array.from(selected).join(', '):'All';}
-function render(){
+
+/* TOS */
+if(!localStorage.getItem('acceptedTOS')) tosOverlay.style.opacity='1', tosOverlay.style.pointerEvents='auto';
+acceptTOS.onclick=()=>{
+  localStorage.setItem('acceptedTOS','1');
+  tosOverlay.style.opacity='0'; tosOverlay.style.pointerEvents='none';
+};
+
+/* Admin login overlay */
+lockBtn.onclick=()=>{adminOverlay.style.opacity='1'; adminOverlay.style.pointerEvents='auto';};
+closeAdminBtn.onclick=()=>{adminOverlay.style.opacity='0'; adminOverlay.style.pointerEvents='none';};
+adminLoginBtn.onclick=async()=>{
+  const email = adminEmailInput.value;
+  const pass = adminPassInput.value;
+  try{
+    await signInWithEmailAndPassword(auth,email,pass);
+    showToast('Admin logged in');
+    adminOverlay.style.opacity='0';
+  }catch(e){
+    adminMsg.textContent = 'Invalid credentials';
+  }
+};
+
+/* Instructions overlay */
+instructionsBtn.onclick=()=>{instructionsOverlay.style.opacity='1'; instructionsOverlay.style.pointerEvents='auto';};
+closeInstructions.onclick=()=>{instructionsOverlay.style.opacity='0'; instructionsOverlay.style.pointerEvents='none';};
+
+/* Fetch bookmarks */
+const bookmarksRef = ref(db,'bookmarks/');
+let allBookmarks = [];
+get(bookmarksRef).then(snapshot=>{
+  if(snapshot.exists()){
+    allBookmarks = Object.values(snapshot.val());
+    renderBookmarks(allBookmarks);
+    renderCategories(allBookmarks);
+  }
+});
+
+function renderBookmarks(items){
   grid.innerHTML='';
-  const term=search.value.toLowerCase();
-  const filtered=data.filter(b=>{
-    const cat=selected.size===0||Object.keys(b.categories||{}).some(k=>selected.has(k));
-    const text=b.title.toLowerCase().includes(term)||(b.desc||'').toLowerCase().includes(term);
-    return cat&&text;
-  });
-  if(!filtered.length){placeholder.style.display='block';return;}else placeholder.style.display='none';
-  filtered.forEach(b=>{
-    const el=document.createElement('div');
-    el.className='card';
-    el.innerHTML=`<div class="card-head"><div class="titleSmall">${b.title}</div><div class="catTag">${Object.keys(b.categories||{}).join(', ')}</div></div>
-      <div class="desc">${b.desc||''}</div>
-      <div class="actions"><div class="copy-square"><img src="https://raw.githubusercontent.com/mojhehh/Ihateschool/main/pngtree-vector-copy-icon-png-image_4162801.jpg"></div></div>`;
-    el.querySelector('.copy-square').onclick=()=>copyCode(b.code);
-    grid.appendChild(el);
-  });
-}
-function copyCode(code){
-  navigator.clipboard.writeText(code).then(()=>{
-    toastText.innerHTML=`✅ Copied — check our <span id="toastLink" style="text-decoration:underline;cursor:pointer;">Instructions</span>`;
-    toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),3000);
-    document.getElementById('toastLink').onclick=()=>openInstructions();
-  });
-}
-search.oninput=render;
-document.getElementById('clearCats').onclick=()=>{selected.clear();updateCount();document.querySelectorAll('.cat-chip').forEach(c=>c.classList.remove('selected'));render();}
-load();
+  items.forEach(b=>{
+    const card = document.createElement('div'); card.className='card';
+    const head = document.createElement('div'); head.className='card-head';
+    const title = document.createElement('div'); title.className='titleSmall'; title.textContent=b.title;
+    const catTag = document.createElement('div'); catTag.className='catTag'; catTag.textContent=b.categories?.join(', ')||'General';
+    head.append(title,catTag);
 
-// --- Instructions overlay ---
-const instructions=document.getElementById('instructionsOverlay');
-const openBtn=document.getElementById('instructionsBtn');
-const closeBtn=document.getElementById('closeInstructions');
-function openInstructions(){instructions.classList.add('showOverlay');}
-function closeInstructionsF(){instructions.classList.remove('showOverlay');}
-openBtn.onclick=openInstructions;
-closeBtn.onclick=closeInstructionsF;
+    const desc = document.createElement('div'); desc.className='desc'; desc.textContent=b.desc||'No description';
+    
+    const actions = document.createElement('div'); actions.className='actions';
+    const copyBtn = document.createElement('div'); copyBtn.className='copy-square'; copyBtn.title='Copy Code';
+    copyBtn.innerHTML='<img src="https://img.icons8.com/material-outlined/24/copy.png"/>';
+    copyBtn.onclick=()=>{navigator.clipboard.writeText(b.code||''); showToast('Copied!');};
+    
+    const useBtn = document.createElement('a'); useBtn.href=b.url||'#'; useBtn.className='btn'; useBtn.textContent='Use';
+    useBtn.target='_blank';
+    
+    const credit = document.createElement('a'); credit.href=b.creditsLink||'#'; credit.target='_blank'; credit.className='credit-link'; credit.textContent='Credits';
+    
+    actions.append(copyBtn,useBtn,credit);
+    card.append(head,desc,actions);
+    grid.append(card);
+  });
+}
+
+/* Categories */
+function renderCategories(items){
+  const cats = new Set(); items.forEach(b=>b.categories?.forEach(c=>cats.add(c)));
+  cats.forEach(c=>{
+    const chip = document.createElement('div'); chip.className='cat-chip'; chip.textContent=c;
+    chip.onclick=()=>filterCategory(c,chip);
+    catChipsContainer.append(chip);
+  });
+}
+let activeCat='';
+function filterCategory(c,chip){
+  if(activeCat===c){activeCat='';chip.classList.remove('selected'); renderBookmarks(allBookmarks); return;}
+  activeCat=c;
+  document.querySelectorAll('.cat-chip').forEach(ch=>ch.classList.remove('selected'));
+  chip.classList.add('selected');
+  renderBookmarks(allBookmarks.filter(b=>b.categories?.includes(c)));
+}
+
+/* Search */
+searchInput.addEventListener('keypress',e=>{if(e.key==='Enter'){const q=e.target.value.toLowerCase();renderBookmarks(allBookmarks.filter(b=>b.title.toLowerCase().includes(q)||b.desc.toLowerCase().includes(q)))}});
+
 </script>
+
 </body>
 </html>
