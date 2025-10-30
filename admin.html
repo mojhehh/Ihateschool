@@ -1,269 +1,146 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Veltra Admin</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Veltra — Admin Panel</title>
 <style>
-  body { font-family: system-ui, sans-serif; margin: 20px; max-width: 1000px; }
-  h1, h2 { margin-top: 20px; }
-  label { display: block; margin-top: 10px; }
-  input, textarea, select { width: 100%; padding: 6px; margin-top: 4px; }
-  button { padding: 6px 12px; margin-top: 8px; cursor: pointer; }
-  .hidden { display: none; }
-  .section { border: 1px solid #ddd; padding: 12px; border-radius: 6px; margin-top: 20px; }
-  .item { border: 1px solid #ccc; padding: 8px; border-radius: 6px; margin-top: 10px; }
-  .item button { margin-right: 6px; }
-  .flex { display: flex; gap: 6px; flex-wrap: wrap; }
-  .small { font-size: 0.85rem; color: #555; }
+:root{
+  --bg:#000; --text:#fff; --muted:rgba(255,255,255,0.65);
+  --border:rgba(255,255,255,0.12); --glow:rgba(255,255,255,0.12);
+  --accent:#9be6a7;
+}
+body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Arial,sans-serif;}
+.container{max-width:1100px;margin:18px auto;padding:14px;}
+h1{font-size:24px;margin-bottom:16px;}
+input,textarea,select,button{padding:8px;border-radius:6px;border:1px solid var(--border);background:transparent;color:#fff;width:100%;margin-bottom:8px;}
+button{cursor:pointer;background:var(--accent);color:#000;border:none;}
+.bookmark-list{margin-top:24px;}
+.bookmark-item{border:1px solid var(--border);padding:12px;margin-bottom:12px;border-radius:8px;}
+.actions{display:flex;gap:8px;margin-top:8px;}
+.actions button{flex:1;}
+.small{font-size:13px;color:var(--muted);}
 </style>
 </head>
 <body>
+<div class="container">
+  <h1>Veltra Admin Panel</h1>
 
-<h1>Veltra Admin Panel</h1>
-
-<div id="loginDiv">
-  <h2>Sign in</h2>
-  <label>Email<input type="email" id="email"></label>
-  <label>Password<input type="password" id="password"></label>
-  <button id="loginBtn">Login</button>
-  <div id="loginMsg" class="small"></div>
-</div>
-
-<div id="adminDiv" class="hidden">
   <div>
-    <span class="small">Signed in as <span id="userEmail"></span> (<span id="userUid"></span>)</span>
-    <button id="logoutBtn">Logout</button>
+    <h2>Add / Edit Bookmark</h2>
+    <input id="titleInput" placeholder="Title">
+    <textarea id="descInput" placeholder="Description"></textarea>
+    <input id="codeInput" placeholder="Bookmarklet code (JS)">
+    <input id="urlInput" placeholder="URL (optional)">
+    <input id="creditsInput" placeholder="Credits Link (source of code)">
+    <input id="categoriesInput" placeholder="Categories (comma separated)">
+    <button id="saveBookmarkBtn">Save Bookmark</button>
+    <p id="saveMsg" class="small"></p>
   </div>
 
-  <!-- Bookmarks Section -->
-  <div class="section">
-    <h2>Bookmarks</h2>
-    <form id="bookmarkForm">
-      <input type="hidden" id="bookmarkId">
-      <label>Title<input id="bmTitle" required></label>
-      <label>URL<input id="bmUrl"></label>
-      <label>Description<textarea id="bmDesc" rows="2"></textarea></label>
-      <label>Code<textarea id="bmCode" rows="2"></textarea></label>
-      <label>Credits Link<input id="bmCredits"></label>
-      <label>Featured
-        <select id="bmFeatured">
-          <option value="false">No</option>
-          <option value="true">Yes</option>
-        </select>
-      </label>
-      <button type="submit">Save Bookmark</button>
-    </form>
-    <div id="bookmarkList">Loading bookmarks…</div>
-  </div>
-
-  <!-- Categories Section -->
-  <div class="section">
-    <h2>Categories</h2>
-    <form id="categoryForm">
-      <input type="hidden" id="categoryId">
-      <label>Name<input id="catName" required></label>
-      <button type="submit">Save Category</button>
-    </form>
-    <div id="categoryList">Loading categories…</div>
-  </div>
+  <div class="bookmark-list" id="bookmarkList"></div>
 </div>
 
-<!-- Firebase SDK -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-import { getDatabase, ref, get, set, push, update, remove } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+import { app, db } from './firebase-config.js';
+import { ref, get, set, push, update } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 
-// Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyCaNPIKQU-LVWctrZffkIJAP1-odXOdof8",
-  authDomain: "school-thingy-45207.firebaseapp.com",
-  databaseURL: "https://school-thingy-45207-default-rtdb.firebaseio.com",
-  projectId: "school-thingy-45207",
-  storageBucket: "school-thingy-45207.firebasestorage.app",
-  messagingSenderId: "1048084200731",
-  appId: "1:1048084200731:web:b0d9927aee9f4d3dbce7be",
-  measurementId: "G-7Y7KRR2EYK"
-};
-
-// Init Firebase
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
-
-// DOM elements
-const loginDiv = document.getElementById('loginDiv');
-const adminDiv = document.getElementById('adminDiv');
-const loginBtn = document.getElementById('loginBtn');
-const logoutBtn = document.getElementById('logoutBtn');
-const loginMsg = document.getElementById('loginMsg');
-const userEmail = document.getElementById('userEmail');
-const userUid = document.getElementById('userUid');
-
-// Forms and lists
-const bookmarkForm = document.getElementById('bookmarkForm');
-const bmTitle = document.getElementById('bmTitle');
-const bmUrl = document.getElementById('bmUrl');
-const bmDesc = document.getElementById('bmDesc');
-const bmCode = document.getElementById('bmCode');
-const bmCredits = document.getElementById('bmCredits');
-const bmFeatured = document.getElementById('bmFeatured');
-const bookmarkId = document.getElementById('bookmarkId');
+const titleInput = document.getElementById('titleInput');
+const descInput = document.getElementById('descInput');
+const codeInput = document.getElementById('codeInput');
+const urlInput = document.getElementById('urlInput');
+const creditsInput = document.getElementById('creditsInput');
+const categoriesInput = document.getElementById('categoriesInput');
+const saveBookmarkBtn = document.getElementById('saveBookmarkBtn');
+const saveMsg = document.getElementById('saveMsg');
 const bookmarkList = document.getElementById('bookmarkList');
 
-const categoryForm = document.getElementById('categoryForm');
-const catName = document.getElementById('catName');
-const categoryId = document.getElementById('categoryId');
-const categoryList = document.getElementById('categoryList');
+let bookmarks = {};
+let editingId = null;
 
-// ----- Auth -----
-loginBtn.addEventListener('click', async () => {
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-  loginMsg.textContent = '';
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-  } catch(e) {
-    loginMsg.textContent = 'Login failed: ' + e.message;
-  }
-});
-
-logoutBtn.addEventListener('click', () => signOut(auth));
-
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    // Check /admins/<uid>
-    const adminRef = ref(db, 'admins/' + user.uid);
-    const snap = await get(adminRef);
-    if (snap.exists() && snap.val() === true) {
-      loginDiv.classList.add('hidden');
-      adminDiv.classList.remove('hidden');
-      userEmail.textContent = user.email;
-      userUid.textContent = user.uid;
-      loadBookmarks();
-      loadCategories();
-    } else {
-      alert('Access denied. Not an admin.');
-      signOut(auth);
-    }
-  } else {
-    loginDiv.classList.remove('hidden');
-    adminDiv.classList.add('hidden');
-  }
-});
-
-// ----- Bookmarks -----
-async function loadBookmarks() {
+async function loadBookmarks(){
   const snap = await get(ref(db, 'bookmarks'));
-  const data = snap.val() || {};
-  renderBookmarks(data);
+  bookmarks = snap.exists() ? snap.val() : {};
+  renderBookmarks();
 }
 
-function renderBookmarks(data) {
+function renderBookmarks(){
   bookmarkList.innerHTML = '';
-  for (const id in data) {
-    const bm = data[id];
+  Object.entries(bookmarks).forEach(([id,b])=>{
     const div = document.createElement('div');
-    div.className = 'item';
+    div.className = 'bookmark-item';
     div.innerHTML = `
-      <strong>${bm.title}</strong> <span class="small">(${bm.featured ? 'Featured' : 'No'})</span>
-      <div class="small">${bm.creditsLink || ''}</div>
-      <div class="flex">
-        <button data-id="${id}" class="edit">Edit</button>
-        <button data-id="${id}" class="del">Delete</button>
+      <strong>${b.title || 'Untitled'}</strong> <span class="small">ID: ${id}</span><br>
+      ${b.desc || ''}<br>
+      <span class="small">Code: ${b.code || ''}</span><br>
+      <span class="small">URL: ${b.url || ''}</span><br>
+      <span class="small">Credits: <a href="${b.creditsLink||'#'}" target="_blank">${b.creditsLink||'N/A'}</a></span><br>
+      <span class="small">Categories: ${b.categories ? Object.values(b.categories).join(', ') : ''}</span>
+      <div class="actions">
+        <button onclick="editBookmark('${id}')">Edit</button>
+        <button onclick="deleteBookmark('${id}')">Delete</button>
       </div>
     `;
     bookmarkList.appendChild(div);
-
-    div.querySelector('.edit').addEventListener('click', () => {
-      bookmarkId.value = id;
-      bmTitle.value = bm.title || '';
-      bmUrl.value = bm.url || '';
-      bmDesc.value = bm.desc || '';
-      bmCode.value = bm.code || '';
-      bmCredits.value = bm.creditsLink || '';
-      bmFeatured.value = bm.featured ? 'true' : 'false';
-    });
-
-    div.querySelector('.del').addEventListener('click', async () => {
-      if (!confirm('Delete this bookmark?')) return;
-      await remove(ref(db, 'bookmarks/' + id));
-      loadBookmarks();
-    });
-  }
+  });
 }
 
-bookmarkForm.addEventListener('submit', async e => {
-  e.preventDefault();
-  const payload = {
-    title: bmTitle.value,
-    url: bmUrl.value,
-    desc: bmDesc.value,
-    code: bmCode.value,
-    creditsLink: bmCredits.value,
-    featured: bmFeatured.value === 'true',
-    updatedAt: Date.now()
+window.editBookmark = function(id){
+  const b = bookmarks[id];
+  if(!b) return;
+  editingId = id;
+  titleInput.value = b.title || '';
+  descInput.value = b.desc || '';
+  codeInput.value = b.code || '';
+  urlInput.value = b.url || '';
+  creditsInput.value = b.creditsLink || '';
+  categoriesInput.value = b.categories ? Object.values(b.categories).join(',') : '';
+  saveMsg.textContent = 'Editing bookmark ' + id;
+}
+
+window.deleteBookmark = async function(id){
+  if(!confirm('Delete this bookmark?')) return;
+  await set(ref(db, 'bookmarks/' + id), null);
+  await loadBookmarks();
+}
+
+saveBookmarkBtn.addEventListener('click', async ()=>{
+  const title = titleInput.value.trim();
+  const desc = descInput.value.trim();
+  const code = codeInput.value.trim();
+  const url = urlInput.value.trim();
+  const creditsLink = creditsInput.value.trim();
+  const categoriesArr = categoriesInput.value.split(',').map(s=>s.trim()).filter(Boolean);
+
+  if(!title || !code){
+    saveMsg.textContent = 'Title and code are required.';
+    return;
+  }
+
+  const data = {
+    title,
+    desc,
+    code,
+    url,
+    creditsLink,
+    categories: categoriesArr.reduce((acc,c,i)=>{ acc[i]=c; return acc; }, {})
   };
-  if (bookmarkId.value) {
-    await update(ref(db, 'bookmarks/' + bookmarkId.value), payload);
+
+  if(editingId){
+    await update(ref(db, 'bookmarks/' + editingId), data);
+    saveMsg.textContent = 'Bookmark updated.';
+    editingId = null;
   } else {
-    payload.createdAt = Date.now();
-    await push(ref(db, 'bookmarks'), payload);
+    const newRef = push(ref(db, 'bookmarks'));
+    await set(newRef, data);
+    saveMsg.textContent = 'Bookmark added.';
   }
-  bookmarkForm.reset();
-  bookmarkId.value = '';
-  loadBookmarks();
+
+  titleInput.value=''; descInput.value=''; codeInput.value=''; urlInput.value=''; creditsInput.value=''; categoriesInput.value='';
+  await loadBookmarks();
 });
 
-// ----- Categories -----
-async function loadCategories() {
-  const snap = await get(ref(db, 'categories'));
-  const data = snap.val() || {};
-  renderCategories(data);
-}
-
-function renderCategories(data) {
-  categoryList.innerHTML = '';
-  for (const id in data) {
-    const cat = data[id];
-    const div = document.createElement('div');
-    div.className = 'item';
-    div.innerHTML = `
-      <strong>${cat.name}</strong>
-      <div class="flex">
-        <button data-id="${id}" class="edit">Edit</button>
-        <button data-id="${id}" class="del">Delete</button>
-      </div>
-    `;
-    categoryList.appendChild(div);
-
-    div.querySelector('.edit').addEventListener('click', () => {
-      categoryId.value = id;
-      catName.value = cat.name;
-    });
-
-    div.querySelector('.del').addEventListener('click', async () => {
-      if (!confirm('Delete this category?')) return;
-      await remove(ref(db, 'categories/' + id));
-      loadCategories();
-    });
-  }
-}
-
-categoryForm.addEventListener('submit', async e => {
-  e.preventDefault();
-  const payload = { name: catName.value, updatedAt: Date.now() };
-  if (categoryId.value) {
-    await update(ref(db, 'categories/' + categoryId.value), payload);
-  } else {
-    payload.createdAt = Date.now();
-    await push(ref(db, 'categories'), payload);
-  }
-  categoryForm.reset();
-  categoryId.value = '';
-  loadCategories();
-});
+loadBookmarks();
 </script>
 </body>
 </html>
