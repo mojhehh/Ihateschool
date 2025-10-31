@@ -167,27 +167,35 @@ let selectedCategories = new Set();
 
 function showOverlay(el){
   el.style.display = 'flex';
+  el.style.pointerEvents = 'auto';
   setTimeout(()=>el.classList.add('showOverlay'),10);
 }
 function hideOverlay(el){
   el.classList.remove('showOverlay');
-  setTimeout(()=>el.style.display='none',300);
+  setTimeout(()=>{
+    el.style.display='none';
+    el.style.pointerEvents='none';
+  },300);
 }
 
-if(localStorage.getItem('veltraTOSAccepted')==='true'){ showMainUI(); } 
-else{ showOverlay(tosOverlay); mainApp.setAttribute('aria-hidden','true'); }
-
-acceptTOS.addEventListener('click',()=>{
-  localStorage.setItem('veltraTOSAccepted','true');
-  hideOverlay(tosOverlay);
-  showMainUI();
-});
 function showMainUI(){
   hideOverlay(tosOverlay);
   mainApp.style.display='block';
   mainApp.removeAttribute('aria-hidden');
   headerLogoContainer.classList.add('visible');
 }
+
+if(localStorage.getItem('veltraTOSAccepted')==='true'){
+  showMainUI();
+} else {
+  showOverlay(tosOverlay);
+  mainApp.setAttribute('aria-hidden','true');
+}
+
+acceptTOS.addEventListener('click',()=>{
+  localStorage.setItem('veltraTOSAccepted','true');
+  showMainUI();
+});
 
 instructionsBtn.addEventListener('click',()=>showOverlay(instructionsOverlay));
 closeInstructions.addEventListener('click',()=>hideOverlay(instructionsOverlay));
