@@ -134,6 +134,8 @@ a{color:var(--text);text-decoration:underline;cursor:pointer;}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
 import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 
+document.addEventListener('DOMContentLoaded', ()=>{
+
 const firebaseConfig = {
   apiKey: "AIzaSyCaNPIKQU-LVWctrZffkIJAP1-odXOdof8",
   authDomain: "school-thingy-45207.firebaseapp.com",
@@ -172,10 +174,7 @@ function showOverlay(el){
 }
 function hideOverlay(el){
   el.classList.remove('showOverlay');
-  setTimeout(()=>{
-    el.style.display='none';
-    el.style.pointerEvents='none';
-  },300);
+  setTimeout(()=>{ el.style.display='none'; el.style.pointerEvents='none'; },300);
 }
 
 function showMainUI(){
@@ -300,6 +299,8 @@ function showToast(msg, link=false){
 }
 
 loadBookmarks();
+
+});
 </script>
 </body>
 </html>
